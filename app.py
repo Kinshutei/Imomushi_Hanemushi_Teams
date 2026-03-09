@@ -7,7 +7,7 @@ import os
 
 DB_PATH = "utawaku.db"
 
-CSV_COLUMNS = ["枠名", "楽曲名", "歌唱順", "配信日", "枠URL", "コラボ相手様"]
+CSV_COLUMNS = ["枠名", "楽曲名", "歌唱順", "配信日", "枠URL", "コラボ相手様", "原曲Artist", "作詞", "作曲"]
 
 # ─────────────────────────────────────────
 # DB初期化
@@ -109,12 +109,19 @@ def export_csv() -> bytes:
             sl.order_in_stream AS 歌唱順,
             st.stream_date     AS 配信日,
             sl.song_url        AS 枠URL,
-            sl.collab          AS コラボ相手様
+            sl.collab          AS コラボ相手様,
+            sg.artist          AS 原曲Artist,
+            sg.lyricist        AS 作詞,
+            sg.composer        AS 作曲
         FROM setlists sl
         JOIN streams st ON sl.stream_id = st.stream_id
         JOIN songs   sg ON sl.song_id   = sg.song_id
         ORDER BY st.stream_date, st.stream_id, sl.order_in_stream
     """)
+    # 列が存在しない場合に備えて補完
+    for col in CSV_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
     df = df[CSV_COLUMNS]
     buf = io.StringIO()
     df.to_csv(buf, index=False, encoding="utf-8-sig")
@@ -155,6 +162,10 @@ def import_csv(uploaded_file) -> tuple[bool, str]:
         df["配信日"] = df["配信日"].apply(parse_date)
         df["枠URL"] = df["枠URL"].fillna("")
         df["コラボ相手様"] = df["コラボ相手様"].fillna("なし")
+        # 任意列：旧フォーマット（列なし）にも対応
+        df["原曲Artist"] = df["原曲Artist"].fillna("") if "原曲Artist" in df.columns else ""
+        df["作詞"]       = df["作詞"].fillna("")       if "作詞"       in df.columns else ""
+        df["作曲"]       = df["作曲"].fillna("")       if "作曲"       in df.columns else ""
 
         conn = get_conn()
         c = conn.cursor()
@@ -174,10 +185,18 @@ def import_csv(uploaded_file) -> tuple[bool, str]:
             )
             stream_id = c.fetchone()[0]
 
+            # 曲が未登録なら INSERT、登録済みなら artist/lyricist/composer を UPDATE
             c.execute(
-                "INSERT OR IGNORE INTO songs (title) VALUES (?)",
-                (row["楽曲名"],)
+                "INSERT OR IGNORE INTO songs (title, artist, lyricist, composer) VALUES (?,?,?,?)",
+                (row["楽曲名"], row["原曲Artist"] or None, row["作詞"] or None, row["作曲"] or None)
             )
+            c.execute("""
+                UPDATE songs SET
+                    artist   = COALESCE(NULLIF(?, ''), artist),
+                    lyricist = COALESCE(NULLIF(?, ''), lyricist),
+                    composer = COALESCE(NULLIF(?, ''), composer)
+                WHERE title = ?
+            """, (row["原曲Artist"], row["作詞"], row["作曲"], row["楽曲名"]))
             c.execute("SELECT song_id FROM songs WHERE title=?", (row["楽曲名"],))
             song_id = c.fetchone()[0]
 
