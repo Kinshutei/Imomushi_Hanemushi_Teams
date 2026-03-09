@@ -274,9 +274,6 @@ def page_streams():
     for _, row in streams_df.iterrows():
         label = f"**{row['配信日']}**　{row['枠名']}"
         with st.expander(label, expanded=False):
-            if row["アーカイブURL"]:
-                st.markdown(f"🔗 [アーカイブを開く]({row['アーカイブURL']})")
-
             setlist_df = fetch_df("""
                 SELECT sl.order_in_stream AS 歌唱順,
                        s.title            AS 楽曲名,
@@ -291,7 +288,17 @@ def page_streams():
             if setlist_df.empty:
                 st.info("この枠にはまだ曲が登録されていません。")
             else:
-                st.dataframe(setlist_df, use_container_width=True, hide_index=True)
+                st.dataframe(
+                    setlist_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "楽曲URL": st.column_config.LinkColumn(
+                            "楽曲URL",
+                            display_text="▶ 開く",
+                        )
+                    }
+                )
 
 # ─────────────────────────────────────────
 # ページ：曲
@@ -341,7 +348,7 @@ def page_songs():
 # ─────────────────────────────────────────
 def main():
     st.set_page_config(
-        page_title="妃玖 歌ってみたDB",
+        page_title="🐍妃玖 歌ってみたDB",
         page_icon="🎤",
         layout="wide"
     )
@@ -369,7 +376,7 @@ def main():
         "=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj"
     )
     st.image(BANNER_URL, use_container_width=True)
-    st.title("🎤 妃玖 歌ってみたDB")
+    st.title("🐍妃玖 歌ってみたDB")
 
     st.sidebar.markdown(
         """
