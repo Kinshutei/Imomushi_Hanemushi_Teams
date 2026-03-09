@@ -98,7 +98,7 @@ def _normalize_df(df: pd.DataFrame) -> pd.DataFrame:
     df["コラボ相手様"] = df["コラボ相手様"].fillna("なし").astype(str)
     for col in ["枠URL", "原曲Artist", "作詞", "作曲"]:
         df[col] = df[col].fillna("").astype(str)
-    df["リリース日"] = df["リリース日"].fillna("").astype(str) if "リリース日" in df.columns else pd.Series("", index=df.index)
+    df["リリース日"] = df["リリース日"].apply(lambda v: "" if pd.isna(v) or str(v).strip() in ("", "nan", "NaN") else str(v).strip())
     return df
 
 def _parse_date(val) -> str:
@@ -206,15 +206,26 @@ def page_songs(df: pd.DataFrame):
 
     # リリース日からリリース年を導出（yyyy年形式）
     def to_release_year(val):
+        v = str(val).strip()
+        if not v or v in ("nan", "NaN", ""):
+            return ""
+        # 「yyyy年m月d日」形式を変換してからパース
+        import re
+        m = re.match(r"(\d{4})年(\d{1,2})月(\d{1,2})日", v)
+        if m:
+            v = f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}"
         try:
-            return f"{pd.to_datetime(str(val)).year}年"
+            return f"{pd.to_datetime(v).year}年"
         except Exception:
             return ""
-    count_df.insert(
-        count_df.columns.get_loc("リリース日") + 1,
-        "リリース年",
-        count_df["リリース日"].apply(lambda v: to_release_year(v) if v else "")
-    )
+    count_df["リリース年"] = count_df["リリース日"].apply(to_release_year)
+    # 列順を整える：リリース日の直後にリリース年を配置
+    cols = list(count_df.columns)
+    if "リリース年" in cols and "リリース日" in cols:
+        cols.remove("リリース年")
+        idx = cols.index("リリース日") + 1
+        cols.insert(idx, "リリース年")
+        count_df = count_df[cols]
 
     st.dataframe(count_df, use_container_width=True, hide_index=True)
 
