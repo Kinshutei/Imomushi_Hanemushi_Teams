@@ -347,6 +347,23 @@ def main():
     )
     init_db()
 
+    # ─── グローバルCSS：コンパクト化 ───
+    st.markdown("""
+    <style>
+    html, body, [class*="css"] { font-size: 14px !important; }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.2rem !important; }
+    h3 { font-size: 1.05rem !important; }
+    .stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 13px !important; }
+    .streamlit-expanderHeader { font-size: 13px !important; }
+    details summary p { font-size: 13px !important; }
+    [data-testid="stSidebar"] * { font-size: 13px !important; }
+    .stButton button, .stDownloadButton button { font-size: 13px !important; padding: 4px 12px !important; }
+    .stAlert p { font-size: 13px !important; }
+    p { line-height: 1.5 !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
     BANNER_URL = (
         "https://yt3.googleusercontent.com/u3MLvApeviPLt_-RPfqiPB1ZPeEtaBknWDv-jKyzMGEijRaireQ2zfxK1HmkuDtJpUIW_uVXxEY"
         "=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj"
