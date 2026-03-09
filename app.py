@@ -1,83 +1,122 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import sqlite3
 import io
-import os
+import base64
+import requests
 
-DB_PATH = "utawaku.db"
-
+# ─────────────────────────────────────────
+# 定数
+# ─────────────────────────────────────────
 CSV_COLUMNS = ["枠名", "楽曲名", "歌唱順", "配信日", "枠URL", "コラボ相手様", "原曲Artist", "作詞", "作曲"]
 
 # ─────────────────────────────────────────
-# DB初期化
+# GitHub ヘルパー
 # ─────────────────────────────────────────
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS streams (
-            stream_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            title       TEXT NOT NULL,
-            stream_date DATE NOT NULL,
-            archive_url TEXT,
-            UNIQUE(title, stream_date)
-        )
-    """)
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS songs (
-            song_id     INTEGER PRIMARY KEY AUTOINCREMENT,
-            title       TEXT NOT NULL,
-            artist      TEXT,
-            lyricist    TEXT,
-            composer    TEXT,
-            UNIQUE(title)
-        )
-    """)
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS setlists (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            stream_id       INTEGER NOT NULL,
-            song_id         INTEGER NOT NULL,
-            order_in_stream INTEGER,
-            song_url        TEXT,
-            collab          TEXT,
-            FOREIGN KEY (stream_id) REFERENCES streams(stream_id),
-            FOREIGN KEY (song_id)   REFERENCES songs(song_id)
-        )
-    """)
-    conn.commit()
-    conn.close()
+def _gh_secrets_ok() -> bool:
+    required = ["github_token", "github_repo", "github_csv_path"]
+    return all(k in st.secrets for k in required)
 
-# ─────────────────────────────────────────
-# DB操作ヘルパー
-# ─────────────────────────────────────────
-def get_conn():
-    return sqlite3.connect(DB_PATH)
+def _gh_headers() -> dict:
+    return {
+        "Authorization": f"Bearer {st.secrets['github_token']}",
+        "Accept": "application/vnd.github+json",
+    }
 
-def fetch_df(query, params=()):
-    conn = get_conn()
-    df = pd.read_sql_query(query, conn, params=params)
-    conn.close()
+def _gh_branch() -> str:
+    return st.secrets.get("github_branch", "main")
+
+def load_df() -> pd.DataFrame:
+    """GitHubからCSVを読み込んでDataFrameを返す。secrets未設定時はローカルフォールバック。"""
+    empty = pd.DataFrame(columns=CSV_COLUMNS)
+
+    if not _gh_secrets_ok():
+        # ローカル開発用：カレントディレクトリの streaming_info.csv を読む
+        try:
+            df = pd.read_csv("streaming_info.csv", encoding="utf-8-sig")
+            return _normalize_df(df)
+        except FileNotFoundError:
+            return empty
+
+    repo  = st.secrets["github_repo"]
+    path  = st.secrets["github_csv_path"]
+    branch = _gh_branch()
+    url   = f"https://api.github.com/repos/{repo}/contents/{path}?ref={branch}"
+
+    try:
+        res = requests.get(url, headers=_gh_headers(), timeout=10)
+        if res.status_code == 404:
+            return empty
+        res.raise_for_status()
+        content = base64.b64decode(res.json()["content"])
+        df = pd.read_csv(io.BytesIO(content), encoding="utf-8-sig")
+        return _normalize_df(df)
+    except Exception as e:
+        st.warning(f"GitHubからのデータ読み込みに失敗しました: {e}")
+        return empty
+
+def push_df(df: pd.DataFrame, commit_msg: str = "Update streaming data") -> tuple[bool, str]:
+    """DataFrameをCSVとしてGitHubにコミットする。"""
+    if not _gh_secrets_ok():
+        # ローカル：ファイルに保存するだけ
+        df.to_csv("streaming_info.csv", index=False, encoding="utf-8-sig")
+        return True, "ローカルファイルに保存しました。"
+
+    repo   = st.secrets["github_repo"]
+    path   = st.secrets["github_csv_path"]
+    branch = _gh_branch()
+    url    = f"https://api.github.com/repos/{repo}/contents/{path}"
+
+    try:
+        # 既存ファイルのSHAを取得（更新に必要）
+        res = requests.get(f"{url}?ref={branch}", headers=_gh_headers(), timeout=10)
+        sha = res.json().get("sha") if res.status_code == 200 else None
+
+        csv_bytes = df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig")
+        payload = {
+            "message": commit_msg,
+            "content": base64.b64encode(csv_bytes).decode(),
+            "branch":  branch,
+        }
+        if sha:
+            payload["sha"] = sha
+
+        res = requests.put(url, headers=_gh_headers(), json=payload, timeout=15)
+        res.raise_for_status()
+        return True, "GitHubにコミットしました。"
+    except Exception as e:
+        return False, f"GitHubへのコミットに失敗しました: {e}"
+
+def _normalize_df(df: pd.DataFrame) -> pd.DataFrame:
+    """型の正規化・欠損補完。"""
+    for col in CSV_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    df = df[CSV_COLUMNS].copy()
+    df["歌唱順"] = pd.to_numeric(df["歌唱順"], errors="coerce").fillna(0).astype(int)
+    df["配信日"] = df["配信日"].apply(_parse_date)
+    df["コラボ相手様"] = df["コラボ相手様"].fillna("なし").astype(str)
+    for col in ["枠URL", "原曲Artist", "作詞", "作曲"]:
+        df[col] = df[col].fillna("").astype(str)
     return df
 
-def execute(query, params=()):
-    conn = get_conn()
-    conn.execute(query, params)
-    conn.commit()
-    conn.close()
+def _parse_date(val) -> str:
+    import re
+    s = str(val).strip()
+    m = re.match(r"(\d{4})年(\d{1,2})月(\d{1,2})日", s)
+    if m:
+        s = f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}"
+    try:
+        return pd.to_datetime(s).strftime("%Y-%m-%d")
+    except Exception:
+        return s
 
 # ─────────────────────────────────────────
 # 認証ヘルパー
 # ─────────────────────────────────────────
 def check_password() -> bool:
-    """
-    サイドバーにパスワード入力UIを表示し、認証状態を返す。
-    secrets に admin_password が未定義の場合はローカル開発とみなし常に True を返す。
-    """
     if "admin_password" not in st.secrets:
-        return True  # ローカル開発時はスルー
-
+        return True
     if st.session_state.get("authenticated"):
         return True
 
@@ -99,123 +138,97 @@ def logout_button():
         st.rerun()
 
 # ─────────────────────────────────────────
-# CSV エクスポート
+# ページ：配信枠
 # ─────────────────────────────────────────
-def export_csv() -> bytes:
-    df = fetch_df("""
-        SELECT
-            st.title           AS 枠名,
-            sg.title           AS 楽曲名,
-            sl.order_in_stream AS 歌唱順,
-            st.stream_date     AS 配信日,
-            sl.song_url        AS 枠URL,
-            sl.collab          AS コラボ相手様,
-            sg.artist          AS 原曲Artist,
-            sg.lyricist        AS 作詞,
-            sg.composer        AS 作曲
-        FROM setlists sl
-        JOIN streams st ON sl.stream_id = st.stream_id
-        JOIN songs   sg ON sl.song_id   = sg.song_id
-        ORDER BY st.stream_date, st.stream_id, sl.order_in_stream
-    """)
-    # 列が存在しない場合に備えて補完
-    for col in CSV_COLUMNS:
-        if col not in df.columns:
-            df[col] = ""
-    df = df[CSV_COLUMNS]
-    buf = io.StringIO()
-    df.to_csv(buf, index=False, encoding="utf-8-sig")
-    return buf.getvalue().encode("utf-8-sig")
+def page_streams(df: pd.DataFrame):
+    st.header("📋 配信枠一覧")
+
+    if df.empty:
+        st.info("配信枠がまだ登録されていません。")
+        return
+
+    streams = (
+        df[["枠名", "配信日", "枠URL"]]
+        .drop_duplicates(subset=["枠名", "配信日"])
+        .sort_values("配信日", ascending=False)
+        .reset_index(drop=True)
+    )
+
+    for _, row in streams.iterrows():
+        label = f"**{row['配信日']}**　{row['枠名']}"
+        with st.expander(label, expanded=False):
+            setlist = (
+                df[df["枠名"] == row["枠名"]]
+                [["歌唱順", "楽曲名", "コラボ相手様", "枠URL"]]
+                .sort_values("歌唱順")
+                .rename(columns={"枠URL": "楽曲URL"})
+                .reset_index(drop=True)
+            )
+            if setlist.empty:
+                st.info("この枠にはまだ曲が登録されていません。")
+            else:
+                st.dataframe(
+                    setlist,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "楽曲URL": st.column_config.LinkColumn(
+                            "楽曲URL",
+                            display_text="▶ 開く",
+                        )
+                    }
+                )
 
 # ─────────────────────────────────────────
-# CSV インポート（完全上書き）
+# ページ：曲一覧 & 統計
 # ─────────────────────────────────────────
-def import_csv(uploaded_file) -> tuple[bool, str]:
-    try:
-        raw = uploaded_file.read()
-        for enc in ("utf-8-sig", "shift-jis", "utf-8"):
-            try:
-                df = pd.read_csv(io.BytesIO(raw), encoding=enc)
-                break
-            except Exception:
-                continue
-        else:
-            return False, "文字コードを判別できませんでした（UTF-8 / Shift-JIS に対応しています）"
+def page_songs(df: pd.DataFrame):
+    st.header("🎵 曲一覧 & 統計")
 
-        missing = [c for c in CSV_COLUMNS if c not in df.columns]
-        if missing:
-            return False, f"必要な列が不足しています: {missing}"
+    if df.empty:
+        st.info("曲がまだ登録されていません。")
+        return
 
-        df = df[CSV_COLUMNS].copy()
-        df["歌唱順"] = pd.to_numeric(df["歌唱順"], errors="coerce").fillna(0).astype(int)
+    # 曲ごとに集計（作詞・作曲・アーティストは最初の非空値を使う）
+    count_df = (
+        df.groupby("楽曲名", as_index=False)
+        .agg(
+            原曲アーティスト=("原曲Artist", lambda x: next((v for v in x if v), "")),
+            作詞=("作詞", lambda x: next((v for v in x if v), "")),
+            作曲=("作曲", lambda x: next((v for v in x if v), "")),
+            歌唱回数=("楽曲名", "count"),
+        )
+        .sort_values("歌唱回数", ascending=False)
+        .reset_index(drop=True)
+    )
 
-        # 日付パース：「2026年2月22日」「2026/2/22」「2026-02-22」など複数形式に対応
-        def parse_date(val):
-            import re
-            s = str(val).strip()
-            # 「YYYY年M月D日」→「YYYY-MM-DD」に変換してからパース
-            m = re.match(r"(\d{4})年(\d{1,2})月(\d{1,2})日", s)
-            if m:
-                s = f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}"
-            return pd.to_datetime(s).strftime("%Y-%m-%d")
+    st.dataframe(count_df, use_container_width=True, hide_index=True)
 
-        df["配信日"] = df["配信日"].apply(parse_date)
-        df["枠URL"] = df["枠URL"].fillna("")
-        df["コラボ相手様"] = df["コラボ相手様"].fillna("なし")
-        # 任意列：旧フォーマット（列なし）にも対応
-        df["原曲Artist"] = df["原曲Artist"].fillna("") if "原曲Artist" in df.columns else ""
-        df["作詞"]       = df["作詞"].fillna("")       if "作詞"       in df.columns else ""
-        df["作曲"]       = df["作曲"].fillna("")       if "作曲"       in df.columns else ""
-
-        conn = get_conn()
-        c = conn.cursor()
-        c.execute("DELETE FROM setlists")
-        c.execute("DELETE FROM streams")
-        c.execute("DELETE FROM songs")
-        c.execute("DELETE FROM sqlite_sequence WHERE name IN ('setlists','streams','songs')")
-
-        for _, row in df.iterrows():
-            c.execute(
-                "INSERT OR IGNORE INTO streams (title, stream_date, archive_url) VALUES (?,?,?)",
-                (row["枠名"], row["配信日"], row["枠URL"] or None)
-            )
-            c.execute(
-                "SELECT stream_id FROM streams WHERE title=? AND stream_date=?",
-                (row["枠名"], row["配信日"])
-            )
-            stream_id = c.fetchone()[0]
-
-            # 曲が未登録なら INSERT、登録済みなら artist/lyricist/composer を UPDATE
-            c.execute(
-                "INSERT OR IGNORE INTO songs (title, artist, lyricist, composer) VALUES (?,?,?,?)",
-                (row["楽曲名"], row["原曲Artist"] or None, row["作詞"] or None, row["作曲"] or None)
-            )
-            c.execute("""
-                UPDATE songs SET
-                    artist   = COALESCE(NULLIF(?, ''), artist),
-                    lyricist = COALESCE(NULLIF(?, ''), lyricist),
-                    composer = COALESCE(NULLIF(?, ''), composer)
-                WHERE title = ?
-            """, (row["原曲Artist"], row["作詞"], row["作曲"], row["楽曲名"]))
-            c.execute("SELECT song_id FROM songs WHERE title=?", (row["楽曲名"],))
-            song_id = c.fetchone()[0]
-
-            c.execute(
-                "INSERT INTO setlists (stream_id, song_id, order_in_stream, song_url, collab) VALUES (?,?,?,?,?)",
-                (stream_id, song_id, row["歌唱順"], row["枠URL"] or None, row["コラボ相手様"])
-            )
-
-        conn.commit()
-        conn.close()
-        return True, f"{len(df)} 件のレコードをインポートしました。"
-
-    except Exception as e:
-        return False, f"エラー: {e}"
+    st.subheader("歌唱回数ランキング（上位20曲）")
+    top20 = count_df[count_df["歌唱回数"] > 0].head(20)
+    if top20.empty:
+        st.info("まだデータがありません。")
+    else:
+        fig = px.bar(
+            top20,
+            x="歌唱回数",
+            y="楽曲名",
+            orientation="h",
+            color="歌唱回数",
+            color_continuous_scale="Blues",
+            hover_data=["原曲アーティスト", "作詞", "作曲"],
+        )
+        fig.update_layout(
+            yaxis=dict(autorange="reversed"),
+            coloraxis_showscale=False,
+            height=max(400, len(top20) * 28),
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────
 # ページ：データ管理（認証必須）
 # ─────────────────────────────────────────
-def page_data_management():
+def page_data_management(df: pd.DataFrame):
     st.header("🔄 データ管理")
 
     if not check_password():
@@ -226,10 +239,11 @@ def page_data_management():
 
     col_ex, col_im = st.columns(2)
 
+    # ── エクスポート ──
     with col_ex:
         st.subheader("📤 エクスポート")
-        st.markdown("現在のDBの内容をCSV形式でダウンロードします。")
-        csv_bytes = export_csv()
+        st.markdown("現在のデータをCSV形式でダウンロードします。")
+        csv_bytes = df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig")
         st.download_button(
             label="⬇️ CSVダウンロード",
             data=csv_bytes,
@@ -238,6 +252,7 @@ def page_data_management():
             use_container_width=True,
         )
 
+    # ── インポート ──
     with col_im:
         st.subheader("📥 インポート（完全上書き）")
         st.warning(
@@ -251,12 +266,30 @@ def page_data_management():
         )
         if uploaded:
             if st.button("🔁 インポート実行", use_container_width=True, type="primary"):
-                ok, msg = import_csv(uploaded)
-                if ok:
-                    st.success(msg)
-                    st.rerun()
+                raw = uploaded.read()
+                new_df = None
+                for enc in ("utf-8-sig", "cp932", "utf-8"):
+                    try:
+                        new_df = pd.read_csv(io.BytesIO(raw), encoding=enc)
+                        break
+                    except Exception:
+                        continue
+
+                if new_df is None:
+                    st.error("文字コードを判別できませんでした。")
                 else:
-                    st.error(msg)
+                    missing = [c for c in ["枠名", "楽曲名", "歌唱順", "配信日"] if c not in new_df.columns]
+                    if missing:
+                        st.error(f"必要な列が不足しています: {missing}")
+                    else:
+                        new_df = _normalize_df(new_df)
+                        ok, msg = push_df(new_df, commit_msg="Update: CSV import via app")
+                        if ok:
+                            st.success(f"{len(new_df)} 件をインポートし、GitHubにコミットしました。")
+                            st.cache_data.clear()
+                            st.rerun()
+                        else:
+                            st.error(msg)
 
     st.divider()
     st.subheader("📋 CSVフォーマット")
@@ -280,92 +313,47 @@ def page_data_management():
     )
 
 # ─────────────────────────────────────────
-# ページ：配信枠
+# データ読み込み（キャッシュ付き）
 # ─────────────────────────────────────────
-def page_streams():
-    st.header("📋 配信枠一覧")
+@st.cache_data(ttl=60)
+def get_data() -> pd.DataFrame:
+    return load_df()
 
-    streams_df = fetch_df("SELECT * FROM streams ORDER BY stream_date DESC")
-
-    if streams_df.empty:
-        st.info("配信枠がまだ登録されていません。")
+def debug_github():
+    """GitHub接続の診断情報を表示する（一時的なデバッグ用）。"""
+    st.subheader("🔍 GitHub接続診断")
+    if not _gh_secrets_ok():
+        st.error("secrets に github_token / github_repo / github_csv_path が設定されていません。")
         return
 
-    streams_df.columns = ["ID", "枠名", "配信日", "アーカイブURL"]
+    repo   = st.secrets["github_repo"]
+    path   = st.secrets["github_csv_path"]
+    branch = _gh_branch()
 
-    for _, row in streams_df.iterrows():
-        label = f"**{row['配信日']}**　{row['枠名']}"
-        with st.expander(label, expanded=False):
-            setlist_df = fetch_df("""
-                SELECT sl.order_in_stream AS 歌唱順,
-                       s.title            AS 楽曲名,
-                       sl.collab          AS コラボ相手様,
-                       sl.song_url        AS 楽曲URL
-                FROM setlists sl
-                JOIN songs s ON sl.song_id = s.song_id
-                WHERE sl.stream_id = ?
-                ORDER BY sl.order_in_stream
-            """, (int(row["ID"]),))
+    st.code(f"repo:   {repo}\npath:   {path}\nbranch: {branch}")
 
-            if setlist_df.empty:
-                st.info("この枠にはまだ曲が登録されていません。")
-            else:
-                st.dataframe(
-                    setlist_df,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "楽曲URL": st.column_config.LinkColumn(
-                            "楽曲URL",
-                            display_text="▶ 開く",
-                        )
-                    }
-                )
-
-# ─────────────────────────────────────────
-# ページ：曲
-# ─────────────────────────────────────────
-def page_songs():
-    st.header("🎵 曲一覧 & 統計")
-
-    count_df = fetch_df("""
-        SELECT s.title       AS 楽曲名,
-               s.artist      AS 原曲アーティスト,
-               s.lyricist    AS 作詞,
-               s.composer    AS 作曲,
-               COUNT(sl.id)  AS 歌唱回数
-        FROM songs s
-        LEFT JOIN setlists sl ON s.song_id = sl.song_id
-        GROUP BY s.song_id
-        ORDER BY 歌唱回数 DESC
-    """)
-
-    if count_df.empty:
-        st.info("曲がまだ登録されていません。")
-        return
-
-    st.dataframe(count_df, use_container_width=True, hide_index=True)
-
-    st.subheader("歌唱回数ランキング（上位20曲）")
-    top20 = count_df[count_df["歌唱回数"] > 0].head(20)
-    if top20.empty:
-        st.info("まだセトリにデータがありません。")
-    else:
-        fig = px.bar(
-            top20,
-            x="歌唱回数",
-            y="楽曲名",
-            orientation="h",
-            color="歌唱回数",
-            color_continuous_scale="Blues",
-            hover_data=["原曲アーティスト", "作詞", "作曲"],
-        )
-        fig.update_layout(
-            yaxis=dict(autorange="reversed"),
-            coloraxis_showscale=False,
-            height=max(400, len(top20) * 28),
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    url = f"https://api.github.com/repos/{repo}/contents/{path}?ref={branch}"
+    try:
+        res = requests.get(url, headers=_gh_headers(), timeout=10)
+        st.write(f"HTTPステータス: **{res.status_code}**")
+        if res.status_code == 200:
+            info = res.json()
+            st.success(f"✅ ファイル発見！サイズ: {info.get('size')} bytes")
+        elif res.status_code == 404:
+            st.error("❌ ファイルが見つかりません。パスまたはブランチ名を確認してください。")
+            # リポジトリのルート一覧を表示
+            root_url = f"https://api.github.com/repos/{repo}/contents/?ref={branch}"
+            root_res = requests.get(root_url, headers=_gh_headers(), timeout=10)
+            if root_res.status_code == 200:
+                files = [f["name"] for f in root_res.json() if isinstance(root_res.json(), list)]
+                st.write("リポジトリのルートにあるファイル一覧:")
+                st.write(files)
+        elif res.status_code == 401:
+            st.error("❌ 認証エラー。github_token が無効または期限切れです。")
+        else:
+            st.error(f"❌ 予期しないエラー: {res.text[:300]}")
+    except Exception as e:
+        st.error(f"接続エラー: {e}")
 
 # ─────────────────────────────────────────
 # メイン
@@ -373,10 +361,9 @@ def page_songs():
 def main():
     st.set_page_config(
         page_title="🐍妃玖 歌ってみたDB",
-        page_icon="🎤",
+        page_icon="🐍",
         layout="wide"
     )
-    init_db()
 
     # ─── グローバルCSS：コンパクト化 ───
     st.markdown("""
@@ -424,12 +411,20 @@ def main():
         }[x],
     )
 
+    df = get_data()
+
     if page == "配信枠":
-        page_streams()
+        page_streams(df)
     elif page == "曲一覧 & 統計":
-        page_songs()
+        page_songs(df)
     else:
-        page_data_management()
+        page_data_management(df)
+
+    # ─── 一時デバッグ：管理者のみ表示 ───
+    if st.session_state.get("authenticated") or "admin_password" not in st.secrets:
+        with st.sidebar.expander("🔍 接続診断", expanded=False):
+            if st.button("診断実行", key="debug_btn"):
+                debug_github()
 
 if __name__ == "__main__":
     main()
