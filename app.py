@@ -234,19 +234,46 @@ def page_songs(df: pd.DataFrame):
     if top20.empty:
         st.info("まだデータがありません。")
     else:
+        # 歌唱回数で正規化した透明度用の値
+        max_count = top20["歌唱回数"].max()
+        top20 = top20.copy()
+        top20["_opacity"] = top20["歌唱回数"] / max_count
+
         fig = px.bar(
             top20,
             x="歌唱回数",
             y="楽曲名",
             orientation="h",
-            color="歌唱回数",
-            color_continuous_scale="Blues",
             hover_data=["原曲アーティスト", "作詞", "作曲"],
+            text="歌唱回数",
+        )
+        fig.update_traces(
+            marker_color=[
+                f"rgba(180, 140, 220, {0.35 + 0.65 * v})"
+                for v in top20["_opacity"]
+            ],
+            marker_line_width=0,
+            textposition="outside",
+            textfont=dict(size=11, color="#cccccc"),
         )
         fig.update_layout(
-            yaxis=dict(autorange="reversed"),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#cccccc", size=12),
+            yaxis=dict(
+                autorange="reversed",
+                showgrid=False,
+                tickfont=dict(size=11),
+            ),
+            xaxis=dict(
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.07)",
+                zeroline=False,
+                tickfont=dict(size=10),
+            ),
             coloraxis_showscale=False,
-            height=max(400, len(top20) * 28),
+            height=max(380, len(top20) * 26),
+            margin=dict(l=10, r=60, t=10, b=10),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -261,22 +288,37 @@ def page_songs(df: pd.DataFrame):
     if treemap_df.empty:
         st.info("リリース年データがまだありません。")
     else:
+        # 年ごとに色相をずらしたパレット
+        import colorsys
+        n = len(treemap_df)
+        colors = []
+        for i in range(n):
+            h = (0.72 + i * 0.07) % 1.0   # 紫〜青〜シアン系でサイクル
+            r, g, b = colorsys.hsv_to_rgb(h, 0.55, 0.80)
+            colors.append(f"rgb({int(r*255)},{int(g*255)},{int(b*255)})")
+
         fig_tree = px.treemap(
             treemap_df,
             path=["リリース年"],
             values="曲数",
-            color="曲数",
-            color_continuous_scale="Blues",
-            hover_data={"曲数": True},
+            color="リリース年",
+            color_discrete_sequence=colors,
         )
         fig_tree.update_traces(
-            texttemplate="<b>%{label}</b><br>%{value}曲",
-            textfont_size=13,
+            texttemplate="<b>%{label}</b><br><span style='font-size:11px'>%{value}曲</span>",
+            textfont=dict(size=13, color="#ffffff"),
+            marker=dict(
+                line=dict(width=2, color="rgba(0,0,0,0.4)"),
+                pad=dict(t=20, l=4, r=4, b=4),
+            ),
+            hovertemplate="<b>%{label}</b><br>%{value}曲<extra></extra>",
         )
         fig_tree.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#cccccc"),
             coloraxis_showscale=False,
-            margin=dict(t=10, l=0, r=0, b=0),
-            height=400,
+            margin=dict(t=4, l=0, r=0, b=0),
+            height=380,
         )
         st.plotly_chart(fig_tree, use_container_width=True)
 
