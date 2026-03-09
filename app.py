@@ -331,6 +331,8 @@ def page_songs():
     count_df = fetch_df("""
         SELECT s.title       AS 楽曲名,
                s.artist      AS 原曲アーティスト,
+               s.lyricist    AS 作詞,
+               s.composer    AS 作曲,
                COUNT(sl.id)  AS 歌唱回数
         FROM songs s
         LEFT JOIN setlists sl ON s.song_id = sl.song_id
@@ -356,7 +358,7 @@ def page_songs():
             orientation="h",
             color="歌唱回数",
             color_continuous_scale="Blues",
-            hover_data=["原曲アーティスト"],
+            hover_data=["原曲アーティスト", "作詞", "作曲"],
         )
         fig.update_layout(
             yaxis=dict(autorange="reversed"),
