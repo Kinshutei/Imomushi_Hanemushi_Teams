@@ -8,7 +8,7 @@ import requests
 # ─────────────────────────────────────────
 # 定数
 # ─────────────────────────────────────────
-CSV_COLUMNS = ["枠名", "楽曲名", "歌唱順", "配信日", "枠URL", "コラボ相手様", "原曲Artist", "作詞", "作曲"]
+CSV_COLUMNS = ["枠名", "楽曲名", "歌唱順", "配信日", "枠URL", "コラボ相手様", "原曲Artist", "作詞", "作曲", "リリース年"]
 
 # ─────────────────────────────────────────
 # GitHub ヘルパー
@@ -98,6 +98,7 @@ def _normalize_df(df: pd.DataFrame) -> pd.DataFrame:
     df["コラボ相手様"] = df["コラボ相手様"].fillna("なし").astype(str)
     for col in ["枠URL", "原曲Artist", "作詞", "作曲"]:
         df[col] = df[col].fillna("").astype(str)
+    df["リリース年"] = pd.to_numeric(df["リリース年"], errors="coerce").astype("Int64") if "リリース年" in df.columns else pd.NA
     return df
 
 def _parse_date(val) -> str:
@@ -196,6 +197,7 @@ def page_songs(df: pd.DataFrame):
             原曲アーティスト=("原曲Artist", lambda x: next((v for v in x if v), "")),
             作詞=("作詞", lambda x: next((v for v in x if v), "")),
             作曲=("作曲", lambda x: next((v for v in x if v), "")),
+            リリース年=("リリース年", lambda x: next((v for v in x if pd.notna(v)), pd.NA)),
             歌唱回数=("楽曲名", "count"),
         )
         .sort_values("歌唱回数", ascending=False)
@@ -306,6 +308,7 @@ def page_data_management(df: pd.DataFrame):
                 "柊キライ",
                 "柊キライ",
                 "柊キライ",
+                "2021",
             ],
         }),
         use_container_width=True,
