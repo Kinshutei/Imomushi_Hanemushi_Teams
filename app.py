@@ -271,36 +271,27 @@ def page_streams():
 
     streams_df.columns = ["ID", "枠名", "配信日", "アーカイブURL"]
 
-    selected = st.selectbox(
-        "枠を選択してセトリを表示",
-        streams_df["ID"].tolist(),
-        format_func=lambda i: (
-            f"{streams_df.loc[streams_df['ID']==i, '配信日'].values[0]}  "
-            f"{streams_df.loc[streams_df['ID']==i, '枠名'].values[0]}"
-        )
-    )
+    for _, row in streams_df.iterrows():
+        label = f"**{row['配信日']}**　{row['枠名']}"
+        with st.expander(label, expanded=False):
+            if row["アーカイブURL"]:
+                st.markdown(f"🔗 [アーカイブを開く]({row['アーカイブURL']})")
 
-    row = streams_df[streams_df["ID"] == selected].iloc[0]
-    st.markdown(f"**{row['枠名']}** ／ {row['配信日']}")
-    if row["アーカイブURL"]:
-        st.markdown(f"🔗 [{row['アーカイブURL']}]({row['アーカイブURL']})")
+            setlist_df = fetch_df("""
+                SELECT sl.order_in_stream AS 歌唱順,
+                       s.title            AS 楽曲名,
+                       sl.collab          AS コラボ相手様,
+                       sl.song_url        AS 楽曲URL
+                FROM setlists sl
+                JOIN songs s ON sl.song_id = s.song_id
+                WHERE sl.stream_id = ?
+                ORDER BY sl.order_in_stream
+            """, (int(row["ID"]),))
 
-    st.subheader("セットリスト")
-    setlist_df = fetch_df("""
-        SELECT sl.order_in_stream AS 歌唱順,
-               s.title            AS 楽曲名,
-               sl.collab          AS コラボ相手様,
-               sl.song_url        AS 楽曲URL
-        FROM setlists sl
-        JOIN songs s ON sl.song_id = s.song_id
-        WHERE sl.stream_id = ?
-        ORDER BY sl.order_in_stream
-    """, (selected,))
-
-    if setlist_df.empty:
-        st.info("この枠にはまだ曲が登録されていません。")
-    else:
-        st.dataframe(setlist_df, use_container_width=True, hide_index=True)
+            if setlist_df.empty:
+                st.info("この枠にはまだ曲が登録されていません。")
+            else:
+                st.dataframe(setlist_df, use_container_width=True, hide_index=True)
 
 # ─────────────────────────────────────────
 # ページ：曲
