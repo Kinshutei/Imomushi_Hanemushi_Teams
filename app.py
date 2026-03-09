@@ -218,9 +218,33 @@ def main():
     )
     init_db()
 
+    # ─── バナー画像 ───
+    BANNER_URL = (
+        "https://yt3.googleusercontent.com/u3MLvApeviPLt_-RPfqiPB1ZPeEtaBknWDv-jKyzMGEijRaireQ2zfxK1HmkuDtJpUIW_uVXxEY"
+        "=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj"
+    )
+    st.image(BANNER_URL, use_container_width=True)
+
     st.title("🎤 妃玖 歌ってみたDB")
 
-    page = st.sidebar.radio("メニュー", ["配信枠", "曲一覧 & 統計"])
+    # ─── サイドバー ───
+    st.sidebar.markdown(
+        """
+        <div style="text-align:center; line-height:1.6; padding-bottom:8px;">
+            <span style="font-size:1.05rem; font-weight:bold;">
+                🐍⚜🎶芋虫羽虫㌠の部屋🎶⚜🐍
+            </span><br>
+            <span style="font-size:0.85rem; color:#aaa;">▼ menu</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    page = st.sidebar.radio(
+        label="",
+        options=["配信枠", "曲一覧 & 統計"],
+        format_func=lambda x: "📺 LiveStreaming Info" if x == "配信枠" else "🎵 Uta-Mita DB",
+    )
 
     if page == "配信枠":
         page_streams()
