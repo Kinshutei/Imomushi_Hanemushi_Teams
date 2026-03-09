@@ -8,7 +8,7 @@ import requests
 # ─────────────────────────────────────────
 # 定数
 # ─────────────────────────────────────────
-CSV_COLUMNS = ["枠名", "楽曲名", "歌唱順", "配信日", "枠URL", "コラボ相手様", "原曲Artist", "作詞", "作曲", "リリース年"]
+CSV_COLUMNS = ["枠名", "楽曲名", "歌唱順", "配信日", "枠URL", "コラボ相手様", "原曲Artist", "作詞", "作曲", "リリース日"]
 
 # ─────────────────────────────────────────
 # GitHub ヘルパー
@@ -98,7 +98,7 @@ def _normalize_df(df: pd.DataFrame) -> pd.DataFrame:
     df["コラボ相手様"] = df["コラボ相手様"].fillna("なし").astype(str)
     for col in ["枠URL", "原曲Artist", "作詞", "作曲"]:
         df[col] = df[col].fillna("").astype(str)
-    df["リリース年"] = pd.to_numeric(df["リリース年"], errors="coerce").astype("Int64") if "リリース年" in df.columns else pd.NA
+    df["リリース日"] = df["リリース日"].fillna("").astype(str) if "リリース日" in df.columns else ""
     return df
 
 def _parse_date(val) -> str:
@@ -197,11 +197,23 @@ def page_songs(df: pd.DataFrame):
             原曲アーティスト=("原曲Artist", lambda x: next((v for v in x if v), "")),
             作詞=("作詞", lambda x: next((v for v in x if v), "")),
             作曲=("作曲", lambda x: next((v for v in x if v), "")),
-            リリース年=("リリース年", lambda x: next((v for v in x if pd.notna(v)), pd.NA)),
+            リリース日=("リリース日", lambda x: next((v for v in x if v), "")),
             歌唱回数=("楽曲名", "count"),
         )
         .sort_values("歌唱回数", ascending=False)
         .reset_index(drop=True)
+    )
+
+    # リリース日からリリース年を導出（yyyy年形式）
+    def to_release_year(val):
+        try:
+            return f"{pd.to_datetime(str(val)).year}年"
+        except Exception:
+            return ""
+    count_df.insert(
+        count_df.columns.get_loc("リリース日") + 1,
+        "リリース年",
+        count_df["リリース日"].apply(lambda v: to_release_year(v) if v else "")
     )
 
     st.dataframe(count_df, use_container_width=True, hide_index=True)
@@ -308,7 +320,7 @@ def page_data_management(df: pd.DataFrame):
                 "柊キライ",
                 "柊キライ",
                 "柊キライ",
-                "2021",
+                "2021-03-15",
             ],
         }),
         use_container_width=True,
