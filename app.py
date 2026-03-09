@@ -250,6 +250,36 @@ def page_songs(df: pd.DataFrame):
         )
         st.plotly_chart(fig, use_container_width=True)
 
+    # ── リリース年度分布ツリーマップ ──
+    st.subheader("リリース年度分布")
+    treemap_df = (
+        count_df[count_df["リリース年"].str.len() > 0]
+        .groupby("リリース年", as_index=False)
+        .agg(曲数=("楽曲名", "count"))
+        .sort_values("リリース年")
+    )
+    if treemap_df.empty:
+        st.info("リリース年データがまだありません。")
+    else:
+        fig_tree = px.treemap(
+            treemap_df,
+            path=["リリース年"],
+            values="曲数",
+            color="曲数",
+            color_continuous_scale="Blues",
+            hover_data={"曲数": True},
+        )
+        fig_tree.update_traces(
+            texttemplate="<b>%{label}</b><br>%{value}曲",
+            textfont_size=13,
+        )
+        fig_tree.update_layout(
+            coloraxis_showscale=False,
+            margin=dict(t=10, l=0, r=0, b=0),
+            height=400,
+        )
+        st.plotly_chart(fig_tree, use_container_width=True)
+
 # ─────────────────────────────────────────
 # ページ：データ管理（認証必須）
 # ─────────────────────────────────────────
