@@ -234,46 +234,45 @@ def page_songs(df: pd.DataFrame):
     if top20.empty:
         st.info("まだデータがありません。")
     else:
-        # 歌唱回数で正規化した透明度用の値
-        max_count = top20["歌唱回数"].max()
         top20 = top20.copy()
-        top20["_opacity"] = top20["歌唱回数"] / max_count
-
+        max_count = top20["歌唱回数"].max()
+        # 濃淡：#2a2a3a（暗）〜 #5a5a8a（明）のグレー青紫
+        top20["_c"] = top20["歌唱回数"].apply(
+            lambda v: f"rgba(90,90,138,{0.4 + 0.6 * v / max_count})"
+        )
         fig = px.bar(
             top20,
             x="歌唱回数",
             y="楽曲名",
             orientation="h",
-            hover_data=["原曲アーティスト", "作詞", "作曲"],
             text="歌唱回数",
+            hover_data=["原曲アーティスト", "作詞", "作曲"],
         )
         fig.update_traces(
-            marker_color=[
-                f"rgba(180, 140, 220, {0.35 + 0.65 * v})"
-                for v in top20["_opacity"]
-            ],
+            marker_color=top20["_c"].tolist(),
             marker_line_width=0,
             textposition="outside",
-            textfont=dict(size=11, color="#cccccc"),
+            textfont=dict(size=11, color="#888899"),
         )
         fig.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#cccccc", size=12),
+            paper_bgcolor="#1a1a2e",
+            plot_bgcolor="#1a1a2e",
+            font=dict(color="#aaaacc", size=12, family="sans-serif"),
             yaxis=dict(
                 autorange="reversed",
                 showgrid=False,
-                tickfont=dict(size=11),
+                tickfont=dict(size=11, color="#888899"),
+                tickcolor="#333344",
             ),
             xaxis=dict(
                 showgrid=True,
-                gridcolor="rgba(255,255,255,0.07)",
+                gridcolor="#2a2a3e",
                 zeroline=False,
-                tickfont=dict(size=10),
+                tickfont=dict(size=10, color="#666677"),
             ),
             coloraxis_showscale=False,
             height=max(380, len(top20) * 26),
-            margin=dict(l=10, r=60, t=10, b=10),
+            margin=dict(l=10, r=55, t=16, b=10),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -288,34 +287,30 @@ def page_songs(df: pd.DataFrame):
     if treemap_df.empty:
         st.info("リリース年データがまだありません。")
     else:
-        # 年ごとに色相をずらしたパレット
-        import colorsys
-        n = len(treemap_df)
-        colors = []
-        for i in range(n):
-            h = (0.72 + i * 0.07) % 1.0   # 紫〜青〜シアン系でサイクル
-            r, g, b = colorsys.hsv_to_rgb(h, 0.55, 0.80)
-            colors.append(f"rgb({int(r*255)},{int(g*255)},{int(b*255)})")
-
         fig_tree = px.treemap(
             treemap_df,
             path=["リリース年"],
             values="曲数",
-            color="リリース年",
-            color_discrete_sequence=colors,
+            color="曲数",
+            color_continuous_scale=[
+                [0.0, "#1e1e2e"],
+                [0.4, "#2e2e4e"],
+                [0.7, "#3e3e6e"],
+                [1.0, "#5a5a8a"],
+            ],
         )
         fig_tree.update_traces(
-            texttemplate="<b>%{label}</b><br><span style='font-size:11px'>%{value}曲</span>",
-            textfont=dict(size=13, color="#ffffff"),
+            texttemplate="<b>%{label}</b><br>%{value}曲",
+            textfont=dict(size=13, color="#ccccdd"),
             marker=dict(
-                line=dict(width=2, color="rgba(0,0,0,0.4)"),
-                pad=dict(t=20, l=4, r=4, b=4),
+                line=dict(width=2, color="#0d0d1a"),
+                pad=dict(t=22, l=4, r=4, b=4),
             ),
             hovertemplate="<b>%{label}</b><br>%{value}曲<extra></extra>",
         )
         fig_tree.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#cccccc"),
+            paper_bgcolor="#1a1a2e",
+            font=dict(color="#aaaacc"),
             coloraxis_showscale=False,
             margin=dict(t=4, l=0, r=0, b=0),
             height=380,
