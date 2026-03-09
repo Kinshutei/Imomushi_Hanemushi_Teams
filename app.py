@@ -98,7 +98,7 @@ def _normalize_df(df: pd.DataFrame) -> pd.DataFrame:
     df["コラボ相手様"] = df["コラボ相手様"].fillna("なし").astype(str)
     for col in ["枠URL", "原曲Artist", "作詞", "作曲"]:
         df[col] = df[col].fillna("").astype(str)
-    df["リリース日"] = df["リリース日"].fillna("").astype(str) if "リリース日" in df.columns else ""
+    df["リリース日"] = df["リリース日"].fillna("").astype(str) if "リリース日" in df.columns else pd.Series("", index=df.index)
     return df
 
 def _parse_date(val) -> str:
