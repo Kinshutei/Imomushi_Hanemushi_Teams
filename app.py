@@ -379,6 +379,9 @@ def main():
     .stButton button, .stDownloadButton button { font-size: 13px !important; padding: 4px 12px !important; }
     .stAlert p { font-size: 13px !important; }
     p { line-height: 1.5 !important; }
+    /* サイドバー：ラジオボタンを中央寄せ */
+    [data-testid="stSidebar"] [data-testid="stRadio"] { text-align: center; }
+    [data-testid="stSidebar"] [data-testid="stRadio"] > div { display: inline-block; text-align: left; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -386,16 +389,19 @@ def main():
         "https://yt3.googleusercontent.com/u3MLvApeviPLt_-RPfqiPB1ZPeEtaBknWDv-jKyzMGEijRaireQ2zfxK1HmkuDtJpUIW_uVXxEY"
         "=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj"
     )
-    st.image(BANNER_URL, use_container_width=True)
+
+    # ─── メイン：タイトルのみ ───
     st.title("🐍妃玖 歌ってみたDB")
 
+    # ─── サイドバー：バナー → タイトル → menu → ラジオ ───
+    st.sidebar.image(BANNER_URL, use_container_width=True)
     st.sidebar.markdown(
         """
-        <div style="text-align:center; line-height:1.6; padding-bottom:8px;">
-            <span style="font-size:1.05rem; font-weight:bold;">
+        <div style="text-align:center; line-height:1.8; padding: 6px 0 2px 0;">
+            <div style="font-size:1.0rem; font-weight:bold;">
                 🐍⚜🎶芋虫羽虫㌠の部屋🎶⚜🐍
-            </span><br>
-            <span style="font-size:0.85rem; color:#aaa;">▼ menu</span>
+            </div>
+            <div style="font-size:0.8rem; color:#aaa; margin-top:4px;">menu</div>
         </div>
         """,
         unsafe_allow_html=True,
