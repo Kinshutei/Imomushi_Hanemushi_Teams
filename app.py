@@ -211,13 +211,14 @@ def page_streams(df: pd.DataFrame):
             if yt_match:
                 vid = yt_match.group(1)
                 thumb_url = f"https://img.youtube.com/vi/{vid}/mqdefault.jpg"
+                clean_url = f"https://www.youtube.com/live/{vid}"
 
             col_thumb, col_table = st.columns([1, 2])
             with col_thumb:
                 if thumb_url:
                     st.image(thumb_url, use_container_width=True)
                     if row.get("枠URL"):
-                        st.markdown(f"[▶ YouTubeで開く]({row['枠URL']})")
+                        st.markdown(f"[▶ YouTubeで開く]({clean_url})")
                 else:
                     st.caption("サムネイルなし")
 
