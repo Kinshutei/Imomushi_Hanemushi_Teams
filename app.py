@@ -133,7 +133,6 @@ def check_password() -> bool:
     return False
 
 def logout_button():
-    st.divider()
     if st.button("🔓 ログアウト"):
         st.session_state["authenticated"] = False
         st.rerun()
