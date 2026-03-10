@@ -522,7 +522,7 @@ def main():
             <img src="{BANNER_URL}" style="width:100%; display:block;" />
         </div>
         <div style="text-align:center; line-height:1.8; padding: 6px 0 2px 0;">
-            <div style="font-size:1.2rem; font-weight:bold;">
+            <div style="font-size:1.6rem; font-weight:bold;">
                 🐍⚜🎶芋虫羽虫㌠の部屋🎶⚜🐍
             </div>
             <div style="font-size:0.8rem; color:#aaa; margin-top:4px;">menu</div>
