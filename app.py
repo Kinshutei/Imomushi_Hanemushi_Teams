@@ -520,7 +520,7 @@ def main():
     }
     /* タブボタンのフォントサイズ */
     [data-testid="stTabs"] [role="tab"] p {
-        font-size: 1.1rem !important;
+        font-size: 1.3rem !important;
         font-weight: bold !important;
     }
     /* タブボタン先頭にsnake画像 */
