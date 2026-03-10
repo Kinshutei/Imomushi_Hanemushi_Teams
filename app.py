@@ -460,7 +460,8 @@ def main():
     # ─── グローバルCSS：コンパクト化 ───
     st.markdown("""
     <style>
-    html, body, [class*="css"] { font-size: 14px !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
+    html, body, [class*="css"] { font-family: 'Noto Sans JP', sans-serif !important; font-size: 14px !important; }
     h1 { font-size: 1.5rem !important; }
     h2 { font-size: 1.2rem !important; }
     h3 { font-size: 1.05rem !important; }
