@@ -164,20 +164,39 @@ def page_streams(df: pd.DataFrame):
                 .rename(columns={"枠URL": "楽曲URL"})
                 .reset_index(drop=True)
             )
-            if setlist.empty:
-                st.info("この枠にはまだ曲が登録されていません。")
-            else:
-                st.dataframe(
-                    setlist,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "楽曲URL": st.column_config.LinkColumn(
-                            "楽曲URL",
-                            display_text="▶ 開く",
-                        )
-                    }
-                )
+
+            # YouTubeサムネイルURLを生成
+            import re as _re
+            thumb_url = None
+            yt_match = _re.search(r"(?:v=|live/)([A-Za-z0-9_-]{11})", str(row.get("枠URL", "")))
+            if yt_match:
+                vid = yt_match.group(1)
+                thumb_url = f"https://img.youtube.com/vi/{vid}/mqdefault.jpg"
+
+            col_thumb, col_table = st.columns([1, 2])
+            with col_thumb:
+                if thumb_url:
+                    st.image(thumb_url, use_container_width=True)
+                    if row.get("枠URL"):
+                        st.markdown(f"[▶ YouTubeで開く]({row['枠URL']})")
+                else:
+                    st.caption("サムネイルなし")
+
+            with col_table:
+                if setlist.empty:
+                    st.info("この枠にはまだ曲が登録されていません。")
+                else:
+                    st.dataframe(
+                        setlist,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "楽曲URL": st.column_config.LinkColumn(
+                                "楽曲URL",
+                                display_text="▶ 開く",
+                            )
+                        }
+                    )
 
 # ─────────────────────────────────────────
 # ページ：曲一覧 & 統計
