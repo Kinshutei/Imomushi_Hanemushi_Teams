@@ -471,6 +471,11 @@ def main():
     .stButton button, .stDownloadButton button { font-size: 13px !important; padding: 4px 12px !important; }
     .stAlert p { font-size: 13px !important; }
     p { line-height: 1.5 !important; }
+    /* サイドバー：バナー画像のマージン・パディングをゼロに */
+    [data-testid="stSidebar"] [data-testid="stImage"],
+    [data-testid="stSidebar"] [data-testid="stImage"] > img,
+    [data-testid="stSidebar"] .stImage { padding: 0 !important; margin: 0 !important; }
+    [data-testid="stSidebar"] [data-testid="stImage"] > div { padding: 0 !important; }
     /* サイドバー：ラジオボタンを中央寄せ */
     [data-testid="stSidebar"] [data-testid="stRadio"] { text-align: center; }
     [data-testid="stSidebar"] [data-testid="stRadio"] > div { display: inline-block; text-align: left; }
