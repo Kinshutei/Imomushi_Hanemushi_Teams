@@ -482,6 +482,7 @@ def main():
     /* サイドバー：ラジオボタンを中央寄せ */
     [data-testid="stSidebar"] [data-testid="stRadio"] { text-align: center; }
     [data-testid="stSidebar"] [data-testid="stRadio"] > div { display: inline-block; text-align: left; }
+    [data-testid="stSidebar"] [data-testid="stRadio"] label p { font-size: 1.2rem !important; }
     /* expander：hoverの背景を透過に */
     details summary:hover {
         background-color: rgba(0,0,0,0.04) !important;
@@ -536,9 +537,9 @@ def main():
         label="",
         options=["配信枠", "曲一覧 & 統計", "データ管理"],
         format_func=lambda x: {
-            "配信枠":        "📺 LiveStreaming Info",
-            "曲一覧 & 統計": "🎵 Uta-Mita DB",
-            "データ管理":    "🔄 Data Management",
+            "配信枠":        "LiveStreaming Info",
+            "曲一覧 & 統計": "Uta-Mita DB",
+            "データ管理":    "Data Management",
         }[x],
     )
 
