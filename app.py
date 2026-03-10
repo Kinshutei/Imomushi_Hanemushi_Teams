@@ -142,7 +142,7 @@ def logout_button():
 # ページ：配信枠
 # ─────────────────────────────────────────
 def page_streams(df: pd.DataFrame):
-    st.header("📋 配信枠一覧")
+
 
     if df.empty:
         st.info("配信枠がまだ登録されていません。")
@@ -184,7 +184,7 @@ def page_streams(df: pd.DataFrame):
 # ページ：曲一覧 & 統計
 # ─────────────────────────────────────────
 def page_songs(df: pd.DataFrame):
-    st.header("🎵 曲一覧 & 統計")
+
 
     if df.empty:
         st.info("曲がまだ登録されていません。")
@@ -320,7 +320,7 @@ def page_songs(df: pd.DataFrame):
 # ページ：データ管理（認証必須）
 # ─────────────────────────────────────────
 def page_data_management(df: pd.DataFrame):
-    st.header("🔄 データ管理")
+
 
     if not check_password():
         return
@@ -519,7 +519,7 @@ def main():
     [data-testid="stTabs"] button p { font-size: 1.1rem !important; font-weight: bold !important; }
     </style>
     """, unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["🐍 LiveStreaming Info", "🐍 Uta-Mita DB", "🐍 Data Management"])
+    tab1, tab2, tab3 = st.tabs(["LiveStreaming Info", "Uta-Mita DB", "Data Management"])
 
     df = get_data()
 
