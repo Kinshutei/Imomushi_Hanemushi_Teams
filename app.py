@@ -516,9 +516,11 @@ def main():
     st.title("🐍妃玖 歌ってみたDB")
 
     # ─── サイドバー：バナー → タイトル → menu → ラジオ ───
-    st.sidebar.image(BANNER_URL, use_container_width=True)
     st.sidebar.markdown(
-        """
+        f"""
+        <div style="margin: -1rem -1rem 0 -1rem;">
+            <img src="{BANNER_URL}" style="width:100%; display:block;" />
+        </div>
         <div style="text-align:center; line-height:1.8; padding: 6px 0 2px 0;">
             <div style="font-size:1.0rem; font-weight:bold;">
                 🐍⚜🎶芋虫羽虫㌠の部屋🎶⚜🐍
