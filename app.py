@@ -516,8 +516,20 @@ def main():
         "=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj"
     )
 
+    # ─── 蛇アイコンをbase64エンコード ───
+    import pathlib
+    _snake_path = pathlib.Path(__file__).parent / "snake_kisaki.png"
+    if _snake_path.exists():
+        _snake_b64 = base64.b64encode(_snake_path.read_bytes()).decode()
+        _snake_img = f'<img src="data:image/png;base64,{_snake_b64}" style="height:2.2rem; vertical-align:middle; margin-right:10px;">'
+    else:
+        _snake_img = ""
+
     # ─── メイン：タイトルのみ ───
-    st.title("🐍妃玖 歌ってみたDB")
+    st.markdown(
+        f'{_snake_img}<span style="font-size:2rem; font-weight:bold; vertical-align:middle;">妃玖LiveStreaming Info</span>',
+        unsafe_allow_html=True,
+    )
 
     # ─── サイドバー：バナー → タイトル → menu → ラジオ ───
     st.sidebar.markdown(
