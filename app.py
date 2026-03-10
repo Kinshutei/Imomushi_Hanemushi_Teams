@@ -477,7 +477,7 @@ def main():
     [data-testid="stSidebar"] .stImage { padding: 0 !important; margin: 0 !important; }
     [data-testid="stSidebar"] [data-testid="stImage"] > div { padding: 0 !important; }
     /* サイドバー：タイトル文字を大きく（* の 13px を上書き） */
-    [data-testid="stSidebar"] h4 { font-size: 1.6rem !important; font-weight: bold !important; text-align: center; white-space: nowrap; margin: 0 !important; padding: 0 !important; }
+    [data-testid="stSidebar"] h4 { font-size: 1.3rem !important; font-weight: bold !important; text-align: center; white-space: nowrap; margin: 0 !important; padding: 0 !important; }
     /* サイドバー：ラジオボタンを中央寄せ */
     [data-testid="stSidebar"] [data-testid="stRadio"] { text-align: center; }
     [data-testid="stSidebar"] [data-testid="stRadio"] > div { display: inline-block; text-align: left; }
