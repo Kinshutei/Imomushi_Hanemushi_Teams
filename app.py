@@ -476,6 +476,8 @@ def main():
     [data-testid="stSidebar"] [data-testid="stImage"] > img,
     [data-testid="stSidebar"] .stImage { padding: 0 !important; margin: 0 !important; }
     [data-testid="stSidebar"] [data-testid="stImage"] > div { padding: 0 !important; }
+    /* サイドバー：タイトル文字を大きく（* の 13px を上書き） */
+    [data-testid="stSidebar"] h4 { font-size: 1.6rem !important; font-weight: bold !important; text-align: center; white-space: nowrap; margin: 0 !important; padding: 0 !important; }
     /* サイドバー：ラジオボタンを中央寄せ */
     [data-testid="stSidebar"] [data-testid="stRadio"] { text-align: center; }
     [data-testid="stSidebar"] [data-testid="stRadio"] > div { display: inline-block; text-align: left; }
@@ -522,9 +524,7 @@ def main():
             <img src="{BANNER_URL}" style="width:100%; display:block;" />
         </div>
         <div style="text-align:center; line-height:1.8; padding: 6px 0 2px 0;">
-            <div style="font-size:1.6rem !important; font-weight:bold; white-space:nowrap; overflow:hidden;">
-                🐍⚜🎶芋虫羽虫㌠の部屋🎶⚜🐍
-            </div>
+            <h4>🐍⚜🎶芋虫羽虫㌠の部屋🎶⚜🐍</h4>
             <div style="font-size:0.8rem; color:#aaa; margin-top:4px;">menu</div>
         </div>
         """,
