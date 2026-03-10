@@ -474,6 +474,18 @@ def main():
     /* サイドバー：ラジオボタンを中央寄せ */
     [data-testid="stSidebar"] [data-testid="stRadio"] { text-align: center; }
     [data-testid="stSidebar"] [data-testid="stRadio"] > div { display: inline-block; text-align: left; }
+    /* expander：デフォルトの ＞ 矢印を非表示にして絵文字に置き換え */
+    details summary svg { display: none !important; }
+    details:not([open]) summary::before {
+        content: "🐍";
+        margin-right: 8px;
+        font-size: 0.95rem;
+    }
+    details[open] summary::before {
+        content: "⚜";
+        margin-right: 8px;
+        font-size: 0.95rem;
+    }
     </style>
     """, unsafe_allow_html=True)
 
