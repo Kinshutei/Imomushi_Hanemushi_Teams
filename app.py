@@ -159,11 +159,12 @@ def page_streams(df: pd.DataFrame):
         gap: 6px;
     }
     #stream-float-ctrl + div button {
-        width: 120px !important;
+        width: 140px !important;
         font-size: 0.85rem !important;
         padding: 6px 10px !important;
         border-radius: 20px !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important;
+        white-space: nowrap !important;
     }
     </style>
     <div id="stream-float-ctrl"></div>
@@ -173,14 +174,14 @@ def page_streams(df: pd.DataFrame):
     if "streams_expanded" not in st.session_state:
         st.session_state.streams_expanded = False
 
-    # floating ボタン（CSSで固定位置に表示）
-    _fc1, _fc2, _fc3 = st.columns([8, 1, 1])
-    with _fc2:
-        if st.button("▼ 全て開く", key="btn_expand_all"):
+    # floating ボタン（左寄せ）
+    _fc1, _fc2, _fc3 = st.columns([1, 1, 8])
+    with _fc1:
+        if st.button("▼ 全て開く", key="btn_expand_all", use_container_width=True):
             st.session_state.streams_expanded = True
             st.rerun()
-    with _fc3:
-        if st.button("▲ 全て閉じる", key="btn_collapse_all"):
+    with _fc2:
+        if st.button("▲ 全て閉じる", key="btn_collapse_all", use_container_width=True):
             st.session_state.streams_expanded = False
             st.rerun()
 
