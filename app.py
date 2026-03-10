@@ -142,10 +142,47 @@ def logout_button():
 # ─────────────────────────────────────────
 def page_streams(df: pd.DataFrame):
 
-
     if df.empty:
         st.info("配信枠がまだ登録されていません。")
         return
+
+    # ─── floating ボタン用CSS ───
+    st.markdown("""
+    <style>
+    #stream-float-ctrl {
+        position: fixed;
+        bottom: 2rem;
+        right: 1.5rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    #stream-float-ctrl + div button {
+        width: 120px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 10px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important;
+    }
+    </style>
+    <div id="stream-float-ctrl"></div>
+    """, unsafe_allow_html=True)
+
+    # session_state 初期化
+    if "streams_expanded" not in st.session_state:
+        st.session_state.streams_expanded = False
+
+    # floating ボタン（CSSで固定位置に表示）
+    _fc1, _fc2, _fc3 = st.columns([8, 1, 1])
+    with _fc2:
+        if st.button("▼ 全て開く", key="btn_expand_all"):
+            st.session_state.streams_expanded = True
+            st.rerun()
+    with _fc3:
+        if st.button("▲ 全て閉じる", key="btn_collapse_all"):
+            st.session_state.streams_expanded = False
+            st.rerun()
 
     streams = (
         df[["枠名", "配信日", "枠URL"]]
@@ -154,9 +191,11 @@ def page_streams(df: pd.DataFrame):
         .reset_index(drop=True)
     )
 
+    expanded_state = st.session_state.streams_expanded
+
     for _, row in streams.iterrows():
         label = f"**{row['配信日']}**　{row['枠名']}"
-        with st.expander(label, expanded=False):
+        with st.expander(label, expanded=expanded_state):
             setlist = (
                 df[df["枠名"] == row["枠名"]]
                 [["歌唱順", "楽曲名", "コラボ相手様", "枠URL"]]
