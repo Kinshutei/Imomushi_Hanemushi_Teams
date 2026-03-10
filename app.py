@@ -236,9 +236,9 @@ def page_songs(df: pd.DataFrame):
     else:
         top20 = top20.copy()
         max_count = top20["歌唱回数"].max()
-        # 濃淡：#2a2a3a（暗）〜 #5a5a8a（明）のグレー青紫
+        # セージグリーン系：薄い(#c8ddc8)〜やや濃い(#6a9e6a)
         top20["_c"] = top20["歌唱回数"].apply(
-            lambda v: f"rgba(90,90,138,{0.4 + 0.6 * v / max_count})"
+            lambda v: f"rgba(100,158,100,{0.25 + 0.55 * v / max_count})"
         )
         fig = px.bar(
             top20,
@@ -252,23 +252,22 @@ def page_songs(df: pd.DataFrame):
             marker_color=top20["_c"].tolist(),
             marker_line_width=0,
             textposition="outside",
-            textfont=dict(size=11, color="#888899"),
+            textfont=dict(size=11, color="#888888"),
         )
         fig.update_layout(
-            paper_bgcolor="#1a1a2e",
-            plot_bgcolor="#1a1a2e",
-            font=dict(color="#aaaacc", size=12, family="sans-serif"),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#555555", size=12),
             yaxis=dict(
                 autorange="reversed",
                 showgrid=False,
-                tickfont=dict(size=11, color="#888899"),
-                tickcolor="#333344",
+                tickfont=dict(size=11, color="#666666"),
             ),
             xaxis=dict(
                 showgrid=True,
-                gridcolor="#2a2a3e",
+                gridcolor="rgba(0,0,0,0.06)",
                 zeroline=False,
-                tickfont=dict(size=10, color="#666677"),
+                tickfont=dict(size=10, color="#888888"),
             ),
             coloraxis_showscale=False,
             height=max(380, len(top20) * 26),
@@ -293,24 +292,24 @@ def page_songs(df: pd.DataFrame):
             values="曲数",
             color="曲数",
             color_continuous_scale=[
-                [0.0, "#1e1e2e"],
-                [0.4, "#2e2e4e"],
-                [0.7, "#3e3e6e"],
-                [1.0, "#5a5a8a"],
+                [0.0, "#e8f2e8"],
+                [0.4, "#c0d8c0"],
+                [0.7, "#92bc92"],
+                [1.0, "#6a9e6a"],
             ],
         )
         fig_tree.update_traces(
             texttemplate="<b>%{label}</b><br>%{value}曲",
-            textfont=dict(size=13, color="#ccccdd"),
+            textfont=dict(size=13, color="#3a3a3a"),
             marker=dict(
-                line=dict(width=2, color="#0d0d1a"),
+                line=dict(width=2, color="#ffffff"),
                 pad=dict(t=22, l=4, r=4, b=4),
             ),
             hovertemplate="<b>%{label}</b><br>%{value}曲<extra></extra>",
         )
         fig_tree.update_layout(
-            paper_bgcolor="#1a1a2e",
-            font=dict(color="#aaaacc"),
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#555555"),
             coloraxis_showscale=False,
             margin=dict(t=4, l=0, r=0, b=0),
             height=380,
