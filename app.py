@@ -531,7 +531,6 @@ def main():
     [data-testid="stTabs"] button p { font-size: 1.1rem !important; font-weight: bold !important; }
     </style>
     """, unsafe_allow_html=True)
-    _si = '<img src="data:image/png;base64,' + _snake_b64 + '" style="height:1.1em;vertical-align:middle;margin-right:4px;" />'
     tab1, tab2, tab3 = st.tabs([
         "LiveStreaming Info",
         "Uta-Mita DB",
