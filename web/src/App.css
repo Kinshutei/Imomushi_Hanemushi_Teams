@@ -1,29 +1,58 @@
-/* ── ベース ── */
+/* ══════════════════════════════════════════
+   Design Token
+   accent : #5fcf80  （妃玖グリーン）
+   surface: #141414 / #1c1c1c / #242424
+   text   : #e8e8e8 / #a0a0a0 / #606060
+   ══════════════════════════════════════════ */
+
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+
+/* ── リセット ── */
 *, *::before, *::after { box-sizing: border-box; }
 
+/* ── ベース ── */
 body {
   margin: 0;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 14px;
-  color: #333;
-  background: #fff;
+  color: #e8e8e8;
+  background: #0e0e0e;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ── スクロールバー ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #141414; }
+::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3e3e3e; }
 
 /* ── レイアウト ── */
 .app {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 0 40px;
+  padding: 0 0 60px;
 }
 
 /* ── バナー ── */
 .banner {
   width: 100%;
   line-height: 0;
+  position: relative;
+}
+.banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, #0e0e0e);
+  pointer-events: none;
 }
 .banner img {
   width: 100%;
-  max-height: 220px;
+  max-height: 240px;
   object-fit: cover;
   display: block;
 }
@@ -32,90 +61,109 @@ body {
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding: 16px 16px 0;
-  border-bottom: 2px solid #e0e0e0;
+  gap: 4px;
+  padding: 0 16px;
+  border-bottom: 1px solid #242424;
+  background: #0e0e0e;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 .tab-btn {
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
-  padding: 8px 20px;
-  font-family: inherit;
-  font-size: 1.05rem;
-  font-weight: bold;
-  color: #888;
+  border-bottom: 2px solid transparent;
+  padding: 14px 24px;
+  font-family: 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #606060;
   cursor: pointer;
-  margin-bottom: -2px;
-  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
 }
-.tab-btn:hover { color: #6a9e6a; }
-/* 🐍 タブアイコン */
-.tab-icon {
-  height: 22px;
-  width: 22px;
-  object-fit: contain;
-  vertical-align: middle;
-  margin-right: 6px;
-  filter: opacity(0.5);
-  transition: filter 0.15s;
-}
-.tab-btn.active .tab-icon,
-.tab-btn:hover .tab-icon {
-  filter: opacity(0.85);
+.tab-btn:hover { color: #a0a0a0; }
+.tab-btn.active {
+  color: #5fcf80;
+  border-bottom-color: #5fcf80;
 }
 
-.tab-btn.active {
-  color: #6a9e6a;
-  border-bottom-color: #6a9e6a;
+/* 🐍 タブアイコン */
+.tab-icon {
+  height: 20px;
+  width: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 7px;
+  filter: opacity(0.3) invert(1);
+  transition: filter 0.2s;
+}
+.tab-btn:hover .tab-icon {
+  filter: opacity(0.6) invert(1);
+}
+.tab-btn.active .tab-icon {
+  filter: opacity(1) invert(44%) sepia(60%) saturate(400%) hue-rotate(95deg) brightness(105%);
 }
 
 /* ── コンテンツエリア ── */
 .content {
-  padding: 20px 20px;
+  padding: 24px 20px;
 }
 
 /* ── ボタン ── */
 .btn-secondary {
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: #1c1c1c;
+  border: 1px solid #2e2e2e;
   border-radius: 20px;
   padding: 4px 14px;
   font-family: inherit;
   font-size: 12px;
-  color: #555;
+  color: #a0a0a0;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  letter-spacing: 0.02em;
 }
-.btn-secondary:hover { background: #eee; }
+.btn-secondary:hover {
+  background: #242424;
+  color: #5fcf80;
+  border-color: #3e3e3e;
+}
 
 /* ── Expander ── */
 .expander {
-  border: 1px solid #e8e8e8;
-  border-radius: 6px;
+  border: 1px solid #222;
+  border-radius: 8px;
   overflow: hidden;
+  transition: border-color 0.15s;
+}
+.expander:hover {
+  border-color: #2e2e2e;
 }
 .expander-header {
   width: 100%;
   text-align: left;
-  background: #fafafa;
+  background: #161616;
   border: none;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 500;
-  color: #444;
+  font-weight: 400;
+  color: #c0c0c0;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background 0.15s, color 0.15s;
   display: flex;
   align-items: center;
 }
-.expander-header:hover { background: #f0f0f0; }
+.expander-header:hover {
+  background: #1e1e1e;
+  color: #e8e8e8;
+}
 .expander-body {
-  padding: 12px 14px;
-  background: #fff;
-  border-top: 1px solid #eee;
+  padding: 14px 16px;
+  background: #121212;
+  border-top: 1px solid #1e1e1e;
 }
 
 /* ── セットリストテーブル ── */
@@ -126,18 +174,22 @@ body {
 }
 .setlist-table th {
   text-align: left;
-  padding: 4px 10px;
-  border-bottom: 1px solid #ddd;
-  color: #666;
+  padding: 5px 10px;
+  border-bottom: 1px solid #2a2a2a;
+  color: #606060;
   font-weight: 500;
   white-space: nowrap;
+  letter-spacing: 0.03em;
 }
 .setlist-table td {
-  padding: 4px 10px;
-  border-bottom: 1px solid #f0f0f0;
-  color: #333;
+  padding: 5px 10px;
+  border-bottom: 1px solid #1a1a1a;
+  color: #c0c0c0;
 }
 .setlist-table tr:last-child td { border-bottom: none; }
+.setlist-table tr:hover td { background: #1a1a1a; }
+.setlist-table a { color: #5fcf80; text-decoration: none; }
+.setlist-table a:hover { color: #8de0a0; text-decoration: underline; }
 
 /* ── 曲一覧テーブル ── */
 .songs-table {
@@ -148,31 +200,46 @@ body {
 }
 .songs-table th {
   text-align: left;
-  padding: 5px 10px;
-  border-bottom: 2px solid #c8ddc8;
-  background: #f5faf5;
-  color: #555;
+  padding: 8px 10px;
+  border-bottom: 1px solid #2e2e2e;
+  background: #161616;
+  color: #606060;
   font-weight: 500;
   white-space: nowrap;
+  letter-spacing: 0.03em;
+  user-select: none;
+}
+.songs-table th:hover {
+  color: #a0a0a0;
+  background: #1c1c1c;
 }
 .songs-table td {
-  padding: 4px 10px;
-  border-bottom: 1px solid #f0f5f0;
+  padding: 6px 10px;
+  border-bottom: 1px solid #1a1a1a;
+  color: #c0c0c0;
 }
-.songs-table tr:hover td { background: #f9fdf9; }
+.songs-table tr:hover td { background: #181818; }
 
 /* ── 見出し ── */
 h3 {
-  font-size: 1.05rem;
-  color: #555;
-  margin: 0 0 8px;
+  font-family: 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #606060;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
 }
+
+/* ── リンク全般 ── */
+a { color: #5fcf80; }
+a:hover { color: #8de0a0; }
 
 /* ── レスポンシブ ── */
 @media (max-width: 600px) {
   .expander-body > div {
     grid-template-columns: 1fr !important;
   }
-  .tabs { gap: 4px; }
-  .tab-btn { font-size: 0.9rem; padding: 6px 12px; }
+  .tabs { gap: 0; }
+  .tab-btn { font-size: 0.85rem; padding: 12px 14px; }
 }
