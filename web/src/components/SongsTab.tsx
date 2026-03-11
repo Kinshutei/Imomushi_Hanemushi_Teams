@@ -112,7 +112,7 @@ export default function SongsTab({ records }: Props) {
                     cursor: 'pointer',
                     userSelect: 'none',
                     whiteSpace: 'nowrap',
-                    background: sortKey === key ? '#edf5ed' : undefined,
+                    background: sortKey === key ? '#1e2e1e' : undefined,
                   }}
                 >
                   {label}{sortIndicator(key)}
