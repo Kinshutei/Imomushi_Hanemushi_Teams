@@ -50,6 +50,21 @@ body {
   transition: color 0.15s, border-color 0.15s;
 }
 .tab-btn:hover { color: #6a9e6a; }
+/* 🐍 タブアイコン */
+.tab-icon {
+  height: 22px;
+  width: 22px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 6px;
+  filter: opacity(0.5);
+  transition: filter 0.15s;
+}
+.tab-btn.active .tab-icon,
+.tab-btn:hover .tab-icon {
+  filter: opacity(0.85);
+}
+
 .tab-btn.active {
   color: #6a9e6a;
   border-bottom-color: #6a9e6a;
