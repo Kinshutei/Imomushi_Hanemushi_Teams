@@ -7,8 +7,46 @@ interface Props {
   records: StreamingRecord[]
 }
 
+type SortKey = keyof SongStat
+type SortDir = 'asc' | 'desc'
+
+const COLUMNS: { key: SortKey; label: string }[] = [
+  { key: '楽曲名',           label: '楽曲名' },
+  { key: '原曲アーティスト', label: '原曲アーティスト' },
+  { key: '作詞',             label: '作詞' },
+  { key: '作曲',             label: '作曲' },
+  { key: 'リリース日',       label: 'リリース日' },
+  { key: 'リリース年',       label: 'リリース年' },
+  { key: '歌唱回数',         label: '歌唱回数' },
+]
+
+function sortSongs(songs: SongStat[], key: SortKey, dir: SortDir): SongStat[] {
+  return [...songs].sort((a, b) => {
+    const av = a[key]
+    const bv = b[key]
+    let cmp: number
+    if (typeof av === 'number' && typeof bv === 'number') {
+      cmp = av - bv
+    } else {
+      cmp = String(av ?? '').localeCompare(String(bv ?? ''), 'ja')
+    }
+    return dir === 'asc' ? cmp : -cmp
+  })
+}
+
 export default function SongsTab({ records }: Props) {
   const songs: SongStat[] = useMemo(() => aggregateSongs(records), [records])
+
+  // ── ソート状態（初期: 歌唱回数降順）──
+  const [sortKey, setSortKey] = useState<SortKey>('歌唱回数')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
+
+  const sortedSongs = useMemo(
+    () => sortSongs(songs, sortKey, sortDir),
+    [songs, sortKey, sortDir]
+  )
+
+  // グラフは元の集計順（歌唱回数降順）を維持
   const top20 = songs.slice(0, 20)
 
   // ── グラフリセット用キー ──
@@ -33,6 +71,20 @@ export default function SongsTab({ records }: Props) {
     return <p style={{ color: '#888', padding: '1rem' }}>曲がまだ登録されていません。</p>
   }
 
+  const handleHeaderClick = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir(key === '歌唱回数' ? 'desc' : 'asc')
+    }
+  }
+
+  const sortIndicator = (key: SortKey) => {
+    if (sortKey !== key) return <span style={{ color: '#ccc', marginLeft: 4 }}>⇅</span>
+    return <span style={{ color: '#6a9e6a', marginLeft: 4 }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
+  }
+
   return (
     <div>
       {/* 曲一覧テーブル */}
@@ -40,17 +92,24 @@ export default function SongsTab({ records }: Props) {
         <table className="songs-table">
           <thead>
             <tr>
-              <th>楽曲名</th>
-              <th>原曲アーティスト</th>
-              <th>作詞</th>
-              <th>作曲</th>
-              <th>リリース日</th>
-              <th>リリース年</th>
-              <th>歌唱回数</th>
+              {COLUMNS.map(({ key, label }) => (
+                <th
+                  key={key}
+                  onClick={() => handleHeaderClick(key)}
+                  style={{
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    whiteSpace: 'nowrap',
+                    background: sortKey === key ? '#edf5ed' : undefined,
+                  }}
+                >
+                  {label}{sortIndicator(key)}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {songs.map((s, i) => (
+            {sortedSongs.map((s, i) => (
               <tr key={i}>
                 <td>{s.楽曲名}</td>
                 <td style={{ color: '#666' }}>{s.原曲アーティスト}</td>
@@ -68,30 +127,23 @@ export default function SongsTab({ records }: Props) {
       {/* 横棒グラフ */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
         <h3 style={{ color: '#555', margin: 0 }}>歌唱回数ランキング（上位20曲）</h3>
-        <button
-          className="btn-secondary"
-          onClick={() => setBarKey((k) => k + 1)}
-          title="ズームをリセット"
-        >
+        <button className="btn-secondary" onClick={() => setBarKey((k) => k + 1)} title="ズームをリセット">
           🏠 リセット
         </button>
       </div>
       <Plot
         key={barKey}
-        data={[
-          {
-            type: 'bar',
-            orientation: 'h',
-            x: top20.map((s) => s.歌唱回数),
-            y: top20.map((s) => s.楽曲名),
-            text: top20.map((s) => String(s.歌唱回数)),
-            textposition: 'outside',
-            marker: { color: barColors, line: { width: 0 } },
-            customdata: top20.map((s) => [s.原曲アーティスト, s.作詞, s.作曲]),
-            hovertemplate:
-              '<b>%{y}</b><br>歌唱回数: %{x}<br>Artist: %{customdata[0]}<extra></extra>',
-          },
-        ]}
+        data={[{
+          type: 'bar',
+          orientation: 'h',
+          x: top20.map((s) => s.歌唱回数),
+          y: top20.map((s) => s.楽曲名),
+          text: top20.map((s) => String(s.歌唱回数)),
+          textposition: 'outside',
+          marker: { color: barColors, line: { width: 0 } },
+          customdata: top20.map((s) => [s.原曲アーティスト, s.作詞, s.作曲]),
+          hovertemplate: '<b>%{y}</b><br>歌唱回数: %{x}<br>Artist: %{customdata[0]}<extra></extra>',
+        }]}
         layout={{
           paper_bgcolor: 'rgba(0,0,0,0)',
           plot_bgcolor: 'rgba(0,0,0,0)',
@@ -111,37 +163,26 @@ export default function SongsTab({ records }: Props) {
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '24px 0 8px' }}>
             <h3 style={{ color: '#555', margin: 0 }}>リリース年度分布</h3>
-            <button
-              className="btn-secondary"
-              onClick={() => setTreeKey((k) => k + 1)}
-              title="ズームをリセット"
-            >
+            <button className="btn-secondary" onClick={() => setTreeKey((k) => k + 1)} title="ズームをリセット">
               🏠 リセット
             </button>
           </div>
           <Plot
             key={treeKey}
-            data={[
-              {
-                type: 'treemap',
-                labels: years.map(([y]) => y),
-                parents: years.map(() => ''),
-                values: years.map(([, v]) => v),
-                texttemplate: '<b>%{label}</b><br>%{value}曲',
-                hovertemplate: '<b>%{label}</b><br>%{value}曲<extra></extra>',
-                marker: {
-                  colors: years.map(([, v]) => v),
-                  colorscale: [
-                    [0.0, '#e8f2e8'],
-                    [0.4, '#c0d8c0'],
-                    [0.7, '#92bc92'],
-                    [1.0, '#6a9e6a'],
-                  ],
-                  line: { width: 2, color: '#ffffff' },
-                  pad: { t: 22, l: 4, r: 4, b: 4 },
-                },
+            data={[{
+              type: 'treemap',
+              labels: years.map(([y]) => y),
+              parents: years.map(() => ''),
+              values: years.map(([, v]) => v),
+              texttemplate: '<b>%{label}</b><br>%{value}曲',
+              hovertemplate: '<b>%{label}</b><br>%{value}曲<extra></extra>',
+              marker: {
+                colors: years.map(([, v]) => v),
+                colorscale: [[0.0,'#e8f2e8'],[0.4,'#c0d8c0'],[0.7,'#92bc92'],[1.0,'#6a9e6a']],
+                line: { width: 2, color: '#ffffff' },
+                pad: { t: 22, l: 4, r: 4, b: 4 },
               },
-            ]}
+            }]}
             layout={{
               paper_bgcolor: 'rgba(0,0,0,0)',
               font: { family: 'Noto Sans JP', color: '#555' },
