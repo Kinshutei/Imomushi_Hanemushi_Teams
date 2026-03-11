@@ -57,7 +57,7 @@ export default function SongsTab({ records }: Props) {
   // ── 横棒グラフ用データ ──
   const maxCount = top20[0]?.歌唱回数 ?? 1
   const barColors = top20.map(
-    (s) => `rgba(100,158,100,${0.25 + 0.55 * (s.歌唱回数 / maxCount)})`
+    (s) => `rgba(95,207,128,${0.2 + 0.7 * (s.歌唱回数 / maxCount)})`
   )
 
   // ── リリース年ツリーマップ用データ ──
@@ -159,9 +159,9 @@ export default function SongsTab({ records }: Props) {
         layout={{
           paper_bgcolor: 'rgba(0,0,0,0)',
           plot_bgcolor: 'rgba(0,0,0,0)',
-          font: { family: 'Noto Sans JP', color: '#555', size: 12 },
-          yaxis: { autorange: 'reversed', showgrid: false, tickfont: { size: 11 } },
-          xaxis: { showgrid: true, gridcolor: 'rgba(0,0,0,0.06)', zeroline: false },
+          font: { family: 'Noto Sans JP', color: '#a0a0a0', size: 12 },
+          yaxis: { autorange: 'reversed', showgrid: false, tickfont: { size: 11 }, color: '#a0a0a0' },
+          xaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.05)', zeroline: false, color: '#606060' },
           margin: { l: 10, r: 55, t: 16, b: 10 },
           height: Math.max(380, top20.length * 26),
         }}
@@ -191,14 +191,14 @@ export default function SongsTab({ records }: Props) {
               hovertemplate: '<b>%{label}</b><br>%{value}曲 (%{text})<extra></extra>',
               marker: {
                 colors: years.map(([, v]) => v),
-                colorscale: [[0.0,'#e8f2e8'],[0.4,'#c0d8c0'],[0.7,'#92bc92'],[1.0,'#6a9e6a']],
+                colorscale: [[0.0,'#1a2e1a'],[0.4,'#2a4a2a'],[0.7,'#3a7a4a'],[1.0,'#5fcf80']],
                 line: { width: 2, color: '#ffffff' },
                 pad: { t: 22, l: 4, r: 4, b: 4 },
               },
             }]}
             layout={{
               paper_bgcolor: 'rgba(0,0,0,0)',
-              font: { family: 'Noto Sans JP', color: '#555' },
+              font: { family: 'Noto Sans JP', color: '#c0c0c0' },
               margin: { t: 4, l: 0, r: 0, b: 0 },
               height: 380,
             }}
@@ -231,10 +231,10 @@ export default function SongsTab({ records }: Props) {
               marker: {
                 colors: artists.map(([, v]) => v),
                 colorscale: [
-                  [0.0, '#e8f2e8'],
-                  [0.4, '#c0d8c0'],
-                  [0.7, '#92bc92'],
-                  [1.0, '#6a9e6a'],
+                  [0.0, '#1a2e1a'],
+                  [0.4, '#2a4a2a'],
+                  [0.7, '#3a7a4a'],
+                  [1.0, '#5fcf80'],
                 ],
                 line: { width: 2, color: '#ffffff' },
                 pad: { t: 22, l: 4, r: 4, b: 4 },
@@ -242,7 +242,7 @@ export default function SongsTab({ records }: Props) {
             }]}
             layout={{
               paper_bgcolor: 'rgba(0,0,0,0)',
-              font: { family: 'Noto Sans JP', color: '#555' },
+              font: { family: 'Noto Sans JP', color: '#c0c0c0' },
               margin: { t: 4, l: 0, r: 0, b: 0 },
               height: 420,
             }}
