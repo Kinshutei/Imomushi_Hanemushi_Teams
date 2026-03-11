@@ -16,6 +16,7 @@ const BANNER_URL =
 
 // 🐍 タブアイコン（web/public/snake_kisaki.png を参照）
 const SNAKE_ICON = `${import.meta.env.BASE_URL}snake_kisaki.png`
+const SNAKE_ICON_STYLE = { '--snake-icon-url': `url(${import.meta.env.BASE_URL}snake_kisaki.png)` } as React.CSSProperties
 
 type Tab = 'streams' | 'songs'
 
@@ -54,14 +55,14 @@ export default function App() {
           className={`tab-btn ${activeTab === 'streams' ? 'active' : ''}`}
           onClick={() => setActiveTab('streams')}
         >
-          <img src={SNAKE_ICON} alt="🐍" className="tab-icon" />
+          <span className="tab-icon" style={SNAKE_ICON_STYLE} />
           LiveStreaming Info
         </button>
         <button
           className={`tab-btn ${activeTab === 'songs' ? 'active' : ''}`}
           onClick={() => setActiveTab('songs')}
         >
-          <img src={SNAKE_ICON} alt="🐍" className="tab-icon" />
+          <span className="tab-icon" style={SNAKE_ICON_STYLE} />
           Uta-Mita DB
         </button>
       </div>
