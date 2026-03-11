@@ -40,7 +40,7 @@ export default function StreamsTab({ records }: Props) {
       {/* 検索フォーム */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', width: '100%', maxWidth: '360px' }}>
-          <span style={{ position: 'absolute', left: '10px', color: '#aaa', fontSize: '14px', pointerEvents: 'none' }}>🔍</span>
+          <span style={{ position: 'absolute', left: '10px', color: '#606060', fontSize: '14px', pointerEvents: 'none' }}>🔍</span>
           <input
             type="text"
             value={query}
@@ -49,13 +49,15 @@ export default function StreamsTab({ records }: Props) {
             style={{
               width: '100%',
               padding: '7px 36px 7px 32px',
-              border: '1px solid #ddd',
+              border: '1px solid #2e2e2e',
               borderRadius: '20px',
               fontFamily: 'inherit',
-              fontSize: '13px',
+              fontSize: '15px',
               outline: 'none',
-              boxShadow: isSearching ? '0 0 0 2px rgba(106,158,106,0.3)' : undefined,
-              borderColor: isSearching ? '#6a9e6a' : '#ddd',
+              background: '#1c1c1c',
+              color: '#e8e8e8',
+              boxShadow: isSearching ? '0 0 0 2px rgba(95,207,128,0.25)' : undefined,
+              borderColor: isSearching ? '#5fcf80' : '#2e2e2e',
               transition: 'border-color 0.15s, box-shadow 0.15s',
             }}
           />
@@ -80,7 +82,7 @@ export default function StreamsTab({ records }: Props) {
           )}
         </div>
         {isSearching && (
-          <span style={{ marginLeft: '10px', fontSize: '12px', color: '#888' }}>
+          <span style={{ marginLeft: '10px', fontSize: '13px', color: '#606060' }}>
             {filteredStreams.length} 件の枠がヒット
           </span>
         )}
@@ -95,7 +97,7 @@ export default function StreamsTab({ records }: Props) {
       )}
 
       {filteredStreams.length === 0 && isSearching && (
-        <p style={{ color: '#aaa', fontSize: '13px' }}>「{trimmedQuery}」を含む枠が見つかりませんでした。</p>
+        <p style={{ color: '#606060', fontSize: '14px' }}>「{trimmedQuery}」を含む枠が見つかりませんでした。</p>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -174,7 +176,7 @@ function StreamExpander({ label, forceOpen, thumbUrl, cleanUrl, setlist, query }
                   </a>
                 </>
               ) : (
-                <span style={{ fontSize: '12px', color: '#aaa' }}>サムネイルなし</span>
+                <span style={{ fontSize: '13px', color: '#484848' }}>サムネイルなし</span>
               )}
             </div>
 
@@ -195,13 +197,13 @@ function StreamExpander({ label, forceOpen, thumbUrl, cleanUrl, setlist, query }
                     return (
                       <tr
                         key={i}
-                        style={isHit ? { backgroundColor: '#e8f5e8' } : undefined}
+                        style={isHit ? { backgroundColor: 'rgba(95,207,128,0.12)' } : undefined}
                       >
-                        <td style={{ textAlign: 'center', color: '#888' }}>{r.歌唱順}</td>
-                        <td style={isHit ? { fontWeight: 600, color: '#3a7a3a' } : undefined}>
+                        <td style={{ textAlign: 'center', color: '#606060' }}>{r.歌唱順}</td>
+                        <td style={isHit ? { fontWeight: 600, color: '#5fcf80' } : undefined}>
                           {r.楽曲名}
                         </td>
-                        <td style={{ color: '#888' }}>{r.コラボ相手様 === 'なし' ? '' : r.コラボ相手様}</td>
+                        <td style={{ color: '#888888' }}>{r.コラボ相手様 === 'なし' ? '' : r.コラボ相手様}</td>
                         <td>
                           {r.枠URL && (
                             <a href={r.枠URL} target="_blank" rel="noopener noreferrer" style={{ color: '#6a9e6a' }}>
