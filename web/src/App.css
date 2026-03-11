@@ -1,0 +1,163 @@
+/* ── ベース ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+}
+
+/* ── レイアウト ── */
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 0 40px;
+}
+
+/* ── バナー ── */
+.banner {
+  width: 100%;
+  line-height: 0;
+}
+.banner img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── タブ ── */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 16px 0;
+  border-bottom: 2px solid #e0e0e0;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 8px 20px;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: #6a9e6a; }
+.tab-btn.active {
+  color: #6a9e6a;
+  border-bottom-color: #6a9e6a;
+}
+
+/* ── コンテンツエリア ── */
+.content {
+  padding: 20px 20px;
+}
+
+/* ── ボタン ── */
+.btn-secondary {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #555;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: background 0.15s;
+}
+.btn-secondary:hover { background: #eee; }
+
+/* ── Expander ── */
+.expander {
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.expander-header {
+  width: 100%;
+  text-align: left;
+  background: #fafafa;
+  border: none;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.1s;
+  display: flex;
+  align-items: center;
+}
+.expander-header:hover { background: #f0f0f0; }
+.expander-body {
+  padding: 12px 14px;
+  background: #fff;
+  border-top: 1px solid #eee;
+}
+
+/* ── セットリストテーブル ── */
+.setlist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.setlist-table th {
+  text-align: left;
+  padding: 4px 10px;
+  border-bottom: 1px solid #ddd;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.setlist-table td {
+  padding: 4px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+.setlist-table tr:last-child td { border-bottom: none; }
+
+/* ── 曲一覧テーブル ── */
+.songs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.songs-table th {
+  text-align: left;
+  padding: 5px 10px;
+  border-bottom: 2px solid #c8ddc8;
+  background: #f5faf5;
+  color: #555;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.songs-table td {
+  padding: 4px 10px;
+  border-bottom: 1px solid #f0f5f0;
+}
+.songs-table tr:hover td { background: #f9fdf9; }
+
+/* ── 見出し ── */
+h3 {
+  font-size: 1.05rem;
+  color: #555;
+  margin: 0 0 8px;
+}
+
+/* ── レスポンシブ ── */
+@media (max-width: 600px) {
+  .expander-body > div {
+    grid-template-columns: 1fr !important;
+  }
+  .tabs { gap: 4px; }
+  .tab-btn { font-size: 0.9rem; padding: 6px 12px; }
+}

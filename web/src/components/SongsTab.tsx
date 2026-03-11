@@ -1,0 +1,137 @@
+import { useMemo } from 'react'
+import Plot from 'react-plotly.js'
+import { StreamingRecord, SongStat } from '../types'
+import { aggregateSongs } from '../utils/csv'
+
+interface Props {
+  records: StreamingRecord[]
+}
+
+export default function SongsTab({ records }: Props) {
+  const songs: SongStat[] = useMemo(() => aggregateSongs(records), [records])
+  const top20 = songs.slice(0, 20)
+
+  // ── 横棒グラフ用データ ──
+  const maxCount = top20[0]?.歌唱回数 ?? 1
+  const barColors = top20.map(
+    (s) => `rgba(100,158,100,${0.25 + 0.55 * (s.歌唱回数 / maxCount)})`
+  )
+
+  // ── ツリーマップ用データ ──
+  const yearMap = new Map<string, number>()
+  for (const s of songs) {
+    if (!s.リリース年) continue
+    yearMap.set(s.リリース年, (yearMap.get(s.リリース年) ?? 0) + 1)
+  }
+  const years = Array.from(yearMap.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+
+  if (records.length === 0) {
+    return <p style={{ color: '#888', padding: '1rem' }}>曲がまだ登録されていません。</p>
+  }
+
+  return (
+    <div>
+      {/* 曲一覧テーブル */}
+      <div style={{ overflowX: 'auto', marginBottom: '32px' }}>
+        <table className="songs-table">
+          <thead>
+            <tr>
+              <th>楽曲名</th>
+              <th>原曲アーティスト</th>
+              <th>作詞</th>
+              <th>作曲</th>
+              <th>リリース日</th>
+              <th>リリース年</th>
+              <th>歌唱回数</th>
+            </tr>
+          </thead>
+          <tbody>
+            {songs.map((s, i) => (
+              <tr key={i}>
+                <td>{s.楽曲名}</td>
+                <td style={{ color: '#666' }}>{s.原曲アーティスト}</td>
+                <td style={{ color: '#666' }}>{s.作詞}</td>
+                <td style={{ color: '#666' }}>{s.作曲}</td>
+                <td style={{ color: '#666' }}>{s.リリース日}</td>
+                <td style={{ color: '#666' }}>{s.リリース年}</td>
+                <td style={{ textAlign: 'center', fontWeight: 600, color: '#6a9e6a' }}>{s.歌唱回数}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 横棒グラフ */}
+      <h3 style={{ color: '#555', marginBottom: '8px' }}>歌唱回数ランキング（上位20曲）</h3>
+      <Plot
+        data={[
+          {
+            type: 'bar',
+            orientation: 'h',
+            x: top20.map((s) => s.歌唱回数),
+            y: top20.map((s) => s.楽曲名),
+            text: top20.map((s) => String(s.歌唱回数)),
+            textposition: 'outside',
+            marker: { color: barColors, line: { width: 0 } },
+            customdata: top20.map((s) => [s.原曲アーティスト, s.作詞, s.作曲]),
+            hovertemplate:
+              '<b>%{y}</b><br>歌唱回数: %{x}<br>Artist: %{customdata[0]}<extra></extra>',
+          },
+        ]}
+        layout={{
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { family: 'Noto Sans JP', color: '#555', size: 12 },
+          yaxis: { autorange: 'reversed', showgrid: false, tickfont: { size: 11 } },
+          xaxis: { showgrid: true, gridcolor: 'rgba(0,0,0,0.06)', zeroline: false },
+          margin: { l: 10, r: 55, t: 16, b: 10 },
+          height: Math.max(380, top20.length * 26),
+          coloraxis: { showscale: false },
+        }}
+        config={{ displayModeBar: false, responsive: true }}
+        style={{ width: '100%' }}
+        useResizeHandler
+      />
+
+      {/* ツリーマップ */}
+      {years.length > 0 && (
+        <>
+          <h3 style={{ color: '#555', margin: '24px 0 8px' }}>リリース年度分布</h3>
+          <Plot
+            data={[
+              {
+                type: 'treemap',
+                labels: years.map(([y]) => y),
+                parents: years.map(() => ''),
+                values: years.map(([, v]) => v),
+                texttemplate: '<b>%{label}</b><br>%{value}曲',
+                hovertemplate: '<b>%{label}</b><br>%{value}曲<extra></extra>',
+                marker: {
+                  colors: years.map(([, v]) => v),
+                  colorscale: [
+                    [0.0, '#e8f2e8'],
+                    [0.4, '#c0d8c0'],
+                    [0.7, '#92bc92'],
+                    [1.0, '#6a9e6a'],
+                  ],
+                  line: { width: 2, color: '#ffffff' },
+                  pad: { t: 22, l: 4, r: 4, b: 4 },
+                },
+              },
+            ]}
+            layout={{
+              paper_bgcolor: 'rgba(0,0,0,0)',
+              font: { family: 'Noto Sans JP', color: '#555' },
+              coloraxis: { showscale: false },
+              margin: { t: 4, l: 0, r: 0, b: 0 },
+              height: 380,
+            }}
+            config={{ displayModeBar: false, responsive: true }}
+            style={{ width: '100%' }}
+            useResizeHandler
+          />
+        </>
+      )}
+    </div>
+  )
+}
