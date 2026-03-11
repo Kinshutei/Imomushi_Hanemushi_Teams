@@ -86,7 +86,6 @@ export default function SongsTab({ records }: Props) {
           xaxis: { showgrid: true, gridcolor: 'rgba(0,0,0,0.06)', zeroline: false },
           margin: { l: 10, r: 55, t: 16, b: 10 },
           height: Math.max(380, top20.length * 26),
-          coloraxis: { showscale: false },
         }}
         config={{ displayModeBar: false, responsive: true }}
         style={{ width: '100%' }}
@@ -122,7 +121,6 @@ export default function SongsTab({ records }: Props) {
             layout={{
               paper_bgcolor: 'rgba(0,0,0,0)',
               font: { family: 'Noto Sans JP', color: '#555' },
-              coloraxis: { showscale: false },
               margin: { t: 4, l: 0, r: 0, b: 0 },
               height: 380,
             }}
