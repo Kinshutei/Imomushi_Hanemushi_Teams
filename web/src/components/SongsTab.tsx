@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Plot from 'react-plotly.js'
 import { StreamingRecord, SongStat } from '../types'
 import { aggregateSongs } from '../utils/csv'
@@ -10,6 +10,10 @@ interface Props {
 export default function SongsTab({ records }: Props) {
   const songs: SongStat[] = useMemo(() => aggregateSongs(records), [records])
   const top20 = songs.slice(0, 20)
+
+  // ── グラフリセット用キー ──
+  const [barKey, setBarKey] = useState(0)
+  const [treeKey, setTreeKey] = useState(0)
 
   // ── 横棒グラフ用データ ──
   const maxCount = top20[0]?.歌唱回数 ?? 1
@@ -62,8 +66,18 @@ export default function SongsTab({ records }: Props) {
       </div>
 
       {/* 横棒グラフ */}
-      <h3 style={{ color: '#555', marginBottom: '8px' }}>歌唱回数ランキング（上位20曲）</h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+        <h3 style={{ color: '#555', margin: 0 }}>歌唱回数ランキング（上位20曲）</h3>
+        <button
+          className="btn-secondary"
+          onClick={() => setBarKey((k) => k + 1)}
+          title="ズームをリセット"
+        >
+          🏠 リセット
+        </button>
+      </div>
       <Plot
+        key={barKey}
         data={[
           {
             type: 'bar',
@@ -95,8 +109,18 @@ export default function SongsTab({ records }: Props) {
       {/* ツリーマップ */}
       {years.length > 0 && (
         <>
-          <h3 style={{ color: '#555', margin: '24px 0 8px' }}>リリース年度分布</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '24px 0 8px' }}>
+            <h3 style={{ color: '#555', margin: 0 }}>リリース年度分布</h3>
+            <button
+              className="btn-secondary"
+              onClick={() => setTreeKey((k) => k + 1)}
+              title="ズームをリセット"
+            >
+              🏠 リセット
+            </button>
+          </div>
           <Plot
+            key={treeKey}
             data={[
               {
                 type: 'treemap',
