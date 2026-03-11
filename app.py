@@ -72,7 +72,7 @@ def push_df(df: pd.DataFrame, commit_msg: str = "Update streaming data") -> tupl
         res = requests.get(f"{url}?ref={branch}", headers=_gh_headers(), timeout=10)
         sha = res.json().get("sha") if res.status_code == 200 else None
 
-        csv_bytes = df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig")
+        csv_bytes = df.to_csv(index=False).encode("utf-8-sig")
         payload = {
             "message": commit_msg,
             "content": base64.b64encode(csv_bytes).decode(),
@@ -392,7 +392,7 @@ def page_data_management(df: pd.DataFrame):
     with col_ex:
         st.subheader("📤 エクスポート")
         st.markdown("現在のデータをCSV形式でダウンロードします。")
-        csv_bytes = df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig")
+        csv_bytes = df.to_csv(index=False).encode("utf-8-sig")
         st.download_button(
             label="⬇️ CSVダウンロード",
             data=csv_bytes,
