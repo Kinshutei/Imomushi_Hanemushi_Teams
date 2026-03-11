@@ -14,6 +14,9 @@ const BANNER_URL =
   'https://yt3.googleusercontent.com/u3MLvApeviPLt_-RPfqiPB1ZPeEtaBknWDv-jKyzMGEijRaireQ2zfxK1HmkuDtJpUIW_uVXxEY' +
   '=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj'
 
+// 🐍 タブアイコン（web/public/snake_kisaki.png を参照）
+const SNAKE_ICON = '/snake_kisaki.png'
+
 type Tab = 'streams' | 'songs'
 
 export default function App() {
@@ -51,13 +54,15 @@ export default function App() {
           className={`tab-btn ${activeTab === 'streams' ? 'active' : ''}`}
           onClick={() => setActiveTab('streams')}
         >
-          🐍 LiveStreaming Info
+          <img src={SNAKE_ICON} alt="🐍" className="tab-icon" />
+          LiveStreaming Info
         </button>
         <button
           className={`tab-btn ${activeTab === 'songs' ? 'active' : ''}`}
           onClick={() => setActiveTab('songs')}
         >
-          🐍 Uta-Mita DB
+          <img src={SNAKE_ICON} alt="🐍" className="tab-icon" />
+          Uta-Mita DB
         </button>
       </div>
 
