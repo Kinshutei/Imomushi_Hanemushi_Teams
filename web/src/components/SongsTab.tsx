@@ -67,6 +67,7 @@ export default function SongsTab({ records }: Props) {
     yearMap.set(s.リリース年, (yearMap.get(s.リリース年) ?? 0) + 1)
   }
   const years = Array.from(yearMap.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+  const yearTotal = years.reduce((sum, [, v]) => sum + v, 0)
 
   // ── 原曲アーティストツリーマップ用データ ──
   const artistMap = new Map<string, number>()
@@ -76,6 +77,7 @@ export default function SongsTab({ records }: Props) {
     artistMap.set(artist, (artistMap.get(artist) ?? 0) + s.歌唱回数)
   }
   const artists = Array.from(artistMap.entries()).sort((a, b) => b[1] - a[1])
+  const artistTotal = artists.reduce((sum, [, v]) => sum + v, 0)
 
   if (records.length === 0) {
     return <p style={{ color: '#888', padding: '1rem' }}>曲がまだ登録されていません。</p>
@@ -184,8 +186,9 @@ export default function SongsTab({ records }: Props) {
               labels: years.map(([y]) => y),
               parents: years.map(() => ''),
               values: years.map(([, v]) => v),
-              texttemplate: '<b>%{label}</b><br>%{value}曲',
-              hovertemplate: '<b>%{label}</b><br>%{value}曲<extra></extra>',
+              text: years.map(([, v]) => `${(v / yearTotal * 100).toFixed(1)}%`),
+              texttemplate: '<b>%{label}</b><br>%{value}曲<br>%{text}',
+              hovertemplate: '<b>%{label}</b><br>%{value}曲 (%{text})<extra></extra>',
               marker: {
                 colors: years.map(([, v]) => v),
                 colorscale: [[0.0,'#e8f2e8'],[0.4,'#c0d8c0'],[0.7,'#92bc92'],[1.0,'#6a9e6a']],
@@ -222,15 +225,16 @@ export default function SongsTab({ records }: Props) {
               labels: artists.map(([a]) => a),
               parents: artists.map(() => ''),
               values: artists.map(([, v]) => v),
-              texttemplate: '<b>%{label}</b><br>%{value}曲',
-              hovertemplate: '<b>%{label}</b><br>%{value}曲<extra></extra>',
+              text: artists.map(([, v]) => `${(v / artistTotal * 100).toFixed(1)}%`),
+              texttemplate: '<b>%{label}</b><br>%{value}曲<br>%{text}',
+              hovertemplate: '<b>%{label}</b><br>%{value}曲 (%{text})<extra></extra>',
               marker: {
                 colors: artists.map(([, v]) => v),
                 colorscale: [
-                  [0.0, '#f2e8f2'],
-                  [0.4, '#d8c0d8'],
-                  [0.7, '#bc92bc'],
-                  [1.0, '#9e6a9e'],
+                  [0.0, '#e8f2e8'],
+                  [0.4, '#c0d8c0'],
+                  [0.7, '#92bc92'],
+                  [1.0, '#6a9e6a'],
                 ],
                 line: { width: 2, color: '#ffffff' },
                 pad: { t: 22, l: 4, r: 4, b: 4 },
