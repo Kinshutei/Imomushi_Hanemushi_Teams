@@ -8,10 +8,14 @@ interface Props {
 
 export default function StreamsTab({ records }: Props) {
   const [expandedAll, setExpandedAll] = useState(false)
+  const [query, setQuery] = useState('')
 
   if (records.length === 0) {
     return <p style={{ color: '#888', padding: '1rem' }}>配信枠がまだ登録されていません。</p>
   }
+
+  const trimmedQuery = query.trim()
+  const isSearching = trimmedQuery.length > 0
 
   // 枠単位に集約（日付降順）
   const streams = Array.from(
@@ -22,16 +26,80 @@ export default function StreamsTab({ records }: Props) {
     ).values()
   )
 
+  // 検索時：ヒットした枠のみ表示
+  const filteredStreams = isSearching
+    ? streams.filter((stream) =>
+        records
+          .filter((r) => r.枠名 === stream.枠名)
+          .some((r) => r.楽曲名.toLowerCase().includes(trimmedQuery.toLowerCase()))
+      )
+    : streams
+
   return (
     <div>
-      {/* 展開/折りたたみボタン */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-        <button className="btn-secondary" onClick={() => setExpandedAll(true)}>▼ 全て開く</button>
-        <button className="btn-secondary" onClick={() => setExpandedAll(false)}>▲ 全て閉じる</button>
+      {/* 検索フォーム */}
+      <div style={{ marginBottom: '12px' }}>
+        <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', width: '100%', maxWidth: '360px' }}>
+          <span style={{ position: 'absolute', left: '10px', color: '#aaa', fontSize: '14px', pointerEvents: 'none' }}>🔍</span>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="曲名で検索..."
+            style={{
+              width: '100%',
+              padding: '7px 36px 7px 32px',
+              border: '1px solid #ddd',
+              borderRadius: '20px',
+              fontFamily: 'inherit',
+              fontSize: '13px',
+              outline: 'none',
+              boxShadow: isSearching ? '0 0 0 2px rgba(106,158,106,0.3)' : undefined,
+              borderColor: isSearching ? '#6a9e6a' : '#ddd',
+              transition: 'border-color 0.15s, box-shadow 0.15s',
+            }}
+          />
+          {isSearching && (
+            <button
+              onClick={() => setQuery('')}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#aaa',
+                fontSize: '14px',
+                lineHeight: 1,
+                padding: '0',
+              }}
+              title="クリア"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        {isSearching && (
+          <span style={{ marginLeft: '10px', fontSize: '12px', color: '#888' }}>
+            {filteredStreams.length} 件の枠がヒット
+          </span>
+        )}
       </div>
 
+      {/* 展開/折りたたみボタン（検索中は非表示） */}
+      {!isSearching && (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+          <button className="btn-secondary" onClick={() => setExpandedAll(true)}>▼ 全て開く</button>
+          <button className="btn-secondary" onClick={() => setExpandedAll(false)}>▲ 全て閉じる</button>
+        </div>
+      )}
+
+      {filteredStreams.length === 0 && isSearching && (
+        <p style={{ color: '#aaa', fontSize: '13px' }}>「{trimmedQuery}」を含む枠が見つかりませんでした。</p>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        {streams.map((stream) => {
+        {filteredStreams.map((stream) => {
           const setlist = records
             .filter((r) => r.枠名 === stream.枠名)
             .sort((a, b) => a.歌唱順 - b.歌唱順)
@@ -47,10 +115,11 @@ export default function StreamsTab({ records }: Props) {
             <StreamExpander
               key={`${stream.枠名}_${stream.配信日}`}
               label={`${stream.配信日}　${stream.枠名}`}
-              forceOpen={expandedAll}
+              forceOpen={isSearching || expandedAll}
               thumbUrl={thumbUrl}
               cleanUrl={cleanUrl}
               setlist={setlist}
+              query={trimmedQuery}
             />
           )
         })}
@@ -65,9 +134,10 @@ interface ExpanderProps {
   thumbUrl: string | null
   cleanUrl: string
   setlist: StreamingRecord[]
+  query: string
 }
 
-function StreamExpander({ label, forceOpen, thumbUrl, cleanUrl, setlist }: ExpanderProps) {
+function StreamExpander({ label, forceOpen, thumbUrl, cleanUrl, setlist, query }: ExpanderProps) {
   const [localOpen, setLocalOpen] = useState(false)
   const isOpen = forceOpen || localOpen
 
@@ -120,20 +190,28 @@ function StreamExpander({ label, forceOpen, thumbUrl, cleanUrl, setlist }: Expan
                   </tr>
                 </thead>
                 <tbody>
-                  {setlist.map((r, i) => (
-                    <tr key={i}>
-                      <td style={{ textAlign: 'center', color: '#888' }}>{r.歌唱順}</td>
-                      <td>{r.楽曲名}</td>
-                      <td style={{ color: '#888' }}>{r.コラボ相手様 === 'なし' ? '' : r.コラボ相手様}</td>
-                      <td>
-                        {r.枠URL && (
-                          <a href={r.枠URL} target="_blank" rel="noopener noreferrer" style={{ color: '#6a9e6a' }}>
-                            ▶ 開く
-                          </a>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {setlist.map((r, i) => {
+                    const isHit = query.length > 0 && r.楽曲名.toLowerCase().includes(query.toLowerCase())
+                    return (
+                      <tr
+                        key={i}
+                        style={isHit ? { backgroundColor: '#e8f5e8' } : undefined}
+                      >
+                        <td style={{ textAlign: 'center', color: '#888' }}>{r.歌唱順}</td>
+                        <td style={isHit ? { fontWeight: 600, color: '#3a7a3a' } : undefined}>
+                          {r.楽曲名}
+                        </td>
+                        <td style={{ color: '#888' }}>{r.コラボ相手様 === 'なし' ? '' : r.コラボ相手様}</td>
+                        <td>
+                          {r.枠URL && (
+                            <a href={r.枠URL} target="_blank" rel="noopener noreferrer" style={{ color: '#6a9e6a' }}>
+                              ▶ 開く
+                            </a>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
