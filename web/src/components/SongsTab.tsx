@@ -52,6 +52,7 @@ export default function SongsTab({ records }: Props) {
   // ── グラフリセット用キー ──
   const [barKey, setBarKey] = useState(0)
   const [treeKey, setTreeKey] = useState(0)
+  const [treeKey2, setTreeKey2] = useState(0)
 
   // ── 横棒グラフ用データ ──
   const maxCount = top20[0]?.歌唱回数 ?? 1
@@ -59,13 +60,22 @@ export default function SongsTab({ records }: Props) {
     (s) => `rgba(100,158,100,${0.25 + 0.55 * (s.歌唱回数 / maxCount)})`
   )
 
-  // ── ツリーマップ用データ ──
+  // ── リリース年ツリーマップ用データ ──
   const yearMap = new Map<string, number>()
   for (const s of songs) {
     if (!s.リリース年) continue
     yearMap.set(s.リリース年, (yearMap.get(s.リリース年) ?? 0) + 1)
   }
   const years = Array.from(yearMap.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+
+  // ── 原曲アーティストツリーマップ用データ ──
+  const artistMap = new Map<string, number>()
+  for (const s of songs) {
+    const artist = s.原曲アーティスト?.trim()
+    if (!artist) continue
+    artistMap.set(artist, (artistMap.get(artist) ?? 0) + s.歌唱回数)
+  }
+  const artists = Array.from(artistMap.entries()).sort((a, b) => b[1] - a[1])
 
   if (records.length === 0) {
     return <p style={{ color: '#888', padding: '1rem' }}>曲がまだ登録されていません。</p>
@@ -188,6 +198,49 @@ export default function SongsTab({ records }: Props) {
               font: { family: 'Noto Sans JP', color: '#555' },
               margin: { t: 4, l: 0, r: 0, b: 0 },
               height: 380,
+            }}
+            config={{ displayModeBar: false, responsive: true }}
+            style={{ width: '100%' }}
+            useResizeHandler
+          />
+        </>
+      )}
+
+      {/* 原曲アーティスト分布ツリーマップ */}
+      {artists.length > 0 && (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '24px 0 8px' }}>
+            <h3 style={{ color: '#555', margin: 0 }}>原曲アーティスト分布</h3>
+            <button className="btn-secondary" onClick={() => setTreeKey2((k) => k + 1)} title="ズームをリセット">
+              🏠 リセット
+            </button>
+          </div>
+          <Plot
+            key={treeKey2}
+            data={[{
+              type: 'treemap',
+              labels: artists.map(([a]) => a),
+              parents: artists.map(() => ''),
+              values: artists.map(([, v]) => v),
+              texttemplate: '<b>%{label}</b><br>%{value}曲',
+              hovertemplate: '<b>%{label}</b><br>%{value}曲<extra></extra>',
+              marker: {
+                colors: artists.map(([, v]) => v),
+                colorscale: [
+                  [0.0, '#f2e8f2'],
+                  [0.4, '#d8c0d8'],
+                  [0.7, '#bc92bc'],
+                  [1.0, '#9e6a9e'],
+                ],
+                line: { width: 2, color: '#ffffff' },
+                pad: { t: 22, l: 4, r: 4, b: 4 },
+              },
+            }]}
+            layout={{
+              paper_bgcolor: 'rgba(0,0,0,0)',
+              font: { family: 'Noto Sans JP', color: '#555' },
+              margin: { t: 4, l: 0, r: 0, b: 0 },
+              height: 420,
             }}
             config={{ displayModeBar: false, responsive: true }}
             style={{ width: '100%' }}
