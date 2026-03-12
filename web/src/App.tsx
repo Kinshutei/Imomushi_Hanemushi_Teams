@@ -3,9 +3,9 @@ import { StreamingRecord } from './types'
 import { parseCSV } from './utils/csv'
 import StreamsTab from './components/StreamsTab'
 import SongsTab from './components/SongsTab'
+import AboutTab from './components/AboutTab'
 import './App.css'
 
-// ★ GitHubのオーナー名・リポジトリ名に合わせて変更してください
 const CSV_URL =
   import.meta.env.VITE_CSV_URL ??
   'https://raw.githubusercontent.com/OWNER/REPO/main/streaming_info.csv'
@@ -14,10 +14,9 @@ const BANNER_URL =
   'https://yt3.googleusercontent.com/u3MLvApeviPLt_-RPfqiPB1ZPeEtaBknWDv-jKyzMGEijRaireQ2zfxK1HmkuDtJpUIW_uVXxEY' +
   '=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj'
 
-// 🐍 タブアイコン（web/public/snake_kisaki.png を参照）
 const SNAKE_ICON = `${import.meta.env.BASE_URL}snake_kisaki.png`
 
-type Tab = 'streams' | 'songs'
+type Tab = 'streams' | 'songs' | 'about'
 
 export default function App() {
   const [records, setRecords] = useState<StreamingRecord[]>([])
@@ -64,16 +63,29 @@ export default function App() {
           <img src={SNAKE_ICON} alt="" className="tab-icon" />
           Uta-Mita DB
         </button>
+        <button
+          className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
+          onClick={() => setActiveTab('about')}
+        >
+          <img src={SNAKE_ICON} alt="" className="tab-icon" />
+          About
+        </button>
       </div>
 
       {/* コンテンツ */}
       <div className="content">
-        {loading && <p style={{ color: '#888' }}>読み込み中...</p>}
-        {error && <p style={{ color: '#c00' }}>データの取得に失敗しました: {error}</p>}
-        {!loading && !error && (
+        {activeTab === 'about' ? (
+          <AboutTab />
+        ) : (
           <>
-            {activeTab === 'streams' && <StreamsTab records={records} />}
-            {activeTab === 'songs' && <SongsTab records={records} />}
+            {loading && <p style={{ color: '#888' }}>読み込み中...</p>}
+            {error && <p style={{ color: '#c00' }}>データの取得に失敗しました: {error}</p>}
+            {!loading && !error && (
+              <>
+                {activeTab === 'streams' && <StreamsTab records={records} />}
+                {activeTab === 'songs' && <SongsTab records={records} />}
+              </>
+            )}
           </>
         )}
       </div>
