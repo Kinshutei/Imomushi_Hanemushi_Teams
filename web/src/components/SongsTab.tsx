@@ -101,16 +101,7 @@ export default function SongsTab({ records }: Props) {
     <div>
       {/* 曲一覧テーブル */}
       <div style={{ overflowX: 'auto', marginBottom: '32px' }}>
-        <table className="songs-table" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '28%' }} />   {/* 楽曲名 */}
-            <col style={{ width: '14%' }} />   {/* 原曲アーティスト */}
-            <col style={{ width: '10%' }} />   {/* 作詞 */}
-            <col style={{ width: '10%' }} />   {/* 作曲 */}
-            <col style={{ width: '12%' }} />   {/* リリース日 */}
-            <col style={{ width: '8%' }} />    {/* リリース年 */}
-            <col style={{ width: '72px' }} />  {/* 歌唱回数 */}
-          </colgroup>
+        <table className="songs-table">
           <thead>
             <tr>
               {COLUMNS.map(({ key, label }) => (
