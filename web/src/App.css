@@ -73,7 +73,7 @@ body {
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 14px 24px;
+  padding: 14px 29px;
   font-family: 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
@@ -217,6 +217,13 @@ body {
   padding: 6px 10px;
   border-bottom: 1px solid #1a1a1a;
   color: #c0c0c0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.songs-table td:first-child {
+  white-space: normal;
+  word-break: break-word;
 }
 .songs-table tr:hover td { background: #181818; }
 
