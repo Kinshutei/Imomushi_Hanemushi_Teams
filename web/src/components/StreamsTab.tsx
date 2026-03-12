@@ -155,7 +155,13 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
         <span dangerouslySetInnerHTML={{ __html: label }} />
       </button>
 
-      {isOpen && (
+      <div
+        style={{
+          maxHeight: isOpen ? '1000px' : '0',
+          overflow: 'hidden',
+          transition: 'max-height 0.35s ease',
+        }}
+      >
         <div className="expander-body">
           <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '16px' }}>
             {/* サムネイル */}
@@ -220,7 +226,7 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
