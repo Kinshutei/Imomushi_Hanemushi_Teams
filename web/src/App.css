@@ -29,7 +29,7 @@ body {
 
 /* ── レイアウト ── */
 .app {
-  max-width: 1100px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 0 60px;
 }
@@ -218,15 +218,6 @@ body {
   border-bottom: 1px solid #1a1a1a;
   color: #c0c0c0;
   white-space: nowrap;
-}
-.songs-table th:last-child,
-.songs-table td:last-child {
-  min-width: 80px;
-  width: 80px;
-}
-.songs-table th:nth-last-child(2),
-.songs-table td:nth-last-child(2) {
-  min-width: 90px;
 }
 .songs-table tr:hover td { background: #181818; }
 
