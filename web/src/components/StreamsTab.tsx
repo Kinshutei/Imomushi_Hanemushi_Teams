@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { StreamingRecord } from '../types'
 import { extractYtVideoId } from '../utils/csv'
 
@@ -37,8 +37,8 @@ export default function StreamsTab({ records }: Props) {
 
   return (
     <div>
-      {/* 検索フォーム */}
-      <div style={{ marginBottom: '12px' }}>
+      {/* 検索フォーム + 展開/折りたたみボタン */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
         <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', width: '100%', maxWidth: '360px' }}>
           <span style={{ position: 'absolute', left: '10px', color: '#606060', fontSize: '14px', pointerEvents: 'none' }}>🔍</span>
           <input
@@ -86,15 +86,13 @@ export default function StreamsTab({ records }: Props) {
             {filteredStreams.length} 件の枠がヒット
           </span>
         )}
+        {!isSearching && (
+          <>
+            <button className="btn-secondary" onClick={() => setExpandedAll(true)}>▼ 全て開く</button>
+            <button className="btn-secondary" onClick={() => setExpandedAll(false)}>▲ 全て閉じる</button>
+          </>
+        )}
       </div>
-
-      {/* 展開/折りたたみボタン（検索中は非表示） */}
-      {!isSearching && (
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-          <button className="btn-secondary" onClick={() => setExpandedAll(true)}>▼ 全て開く</button>
-          <button className="btn-secondary" onClick={() => setExpandedAll(false)}>▲ 全て閉じる</button>
-        </div>
-      )}
 
       {filteredStreams.length === 0 && isSearching && (
         <p style={{ color: '#606060', fontSize: '14px' }}>「{trimmedQuery}」を含む枠が見つかりませんでした。</p>
@@ -142,6 +140,10 @@ interface ExpanderProps {
 function StreamExpander({ label, forceOpen, thumbUrl, cleanUrl, setlist, query }: ExpanderProps) {
   const [localOpen, setLocalOpen] = useState(false)
   const isOpen = forceOpen || localOpen
+
+  useEffect(() => {
+    if (!forceOpen) setLocalOpen(false)
+  }, [forceOpen])
 
   return (
     <div className="expander">
