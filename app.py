@@ -598,15 +598,11 @@ def main():
     }
     </style>
     """, unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["LiveStreaming Info", "Uta-Mita DB", "Data Management"])
+    tab1, = st.tabs(["Data Management"])
 
     df = get_data()
 
     with tab1:
-        page_streams(df)
-    with tab2:
-        page_songs(df)
-    with tab3:
         page_data_management(df)
 
     # ─── デバッグ：管理者のみ ───
