@@ -4,6 +4,7 @@ import { parseCSV } from './utils/csv'
 import StreamsTab from './components/StreamsTab'
 import SongsTab from './components/SongsTab'
 import AboutTab from './components/AboutTab'
+import ChangelogTab from './components/ChangelogTab'
 import './App.css'
 
 const CSV_URL =
@@ -16,7 +17,7 @@ const BANNER_URL =
 
 const SNAKE_ICON = `${import.meta.env.BASE_URL}snake_kisaki.png`
 
-type Tab = 'streams' | 'songs' | 'about'
+type Tab = 'streams' | 'songs' | 'about' | 'changelog'
 
 export default function App() {
   const [records, setRecords] = useState<StreamingRecord[]>([])
@@ -70,12 +71,21 @@ export default function App() {
           <img src={SNAKE_ICON} alt="" className="tab-icon" />
           About
         </button>
+        <button
+          className={`tab-btn ${activeTab === 'changelog' ? 'active' : ''}`}
+          onClick={() => setActiveTab('changelog')}
+        >
+          <img src={SNAKE_ICON} alt="" className="tab-icon" />
+          更新履歴
+        </button>
       </div>
 
       {/* コンテンツ */}
       <div className="content">
         {activeTab === 'about' ? (
           <AboutTab />
+        ) : activeTab === 'changelog' ? (
+          <ChangelogTab />
         ) : (
           <>
             {loading && <p style={{ color: '#888' }}>読み込み中...</p>}
