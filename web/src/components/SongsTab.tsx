@@ -100,6 +100,7 @@ export default function SongsTab({ records }: Props) {
   return (
     <div>
       {/* 曲一覧テーブル */}
+      <p style={{ color: '#606060', fontSize: '14px', margin: '0 0 8px' }}>全 {sortedSongs.length} 曲</p>
       <div style={{ overflowX: 'auto', marginBottom: '32px' }}>
         <table className="songs-table">
           <thead>
