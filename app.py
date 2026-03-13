@@ -37,7 +37,7 @@ def load_df() -> pd.DataFrame:
     empty = pd.DataFrame(columns=CSV_COLUMNS)
     if not _gh_secrets_ok():
         try:
-            df = pd.read_csv("streaming_info.csv", encoding="utf-8-sig")
+            df = pd.read_csv("streaming_info_mikage.csv", encoding="utf-8-sig")
             return _normalize_df(df)
         except FileNotFoundError:
             return empty
@@ -59,7 +59,7 @@ def load_df() -> pd.DataFrame:
 
 def push_df(df: pd.DataFrame, commit_msg: str = "Update streaming data") -> tuple[bool, str]:
     if not _gh_secrets_ok():
-        df.to_csv("streaming_info.csv", index=False, encoding="utf-8-sig")
+        df.to_csv("streaming_info_mikage.csv", index=False, encoding="utf-8-sig")
         return True, "ローカルファイルに保存しました。"
     repo   = st.secrets["github_repo"]
     path   = st.secrets["github_csv_path"]
@@ -448,48 +448,6 @@ def page_data_management(df: pd.DataFrame):
 
     logout_button()
 
-    # ── 1曲追加フォーム ──
-    st.subheader("➕ 歌唱記録を追加")
-    with st.form("add_record_form", clear_on_submit=True):
-        c1, c2 = st.columns(2)
-        with c1:
-            枠名    = st.text_input("枠名 *", placeholder="【歌枠】深影の歌配信")
-            配信日  = st.date_input("配信日 *")
-            枠URL   = st.text_input("枠URL", placeholder="https://www.youtube.com/live/xxxxx")
-            コラボ  = st.text_input("コラボ相手様", value="なし")
-        with c2:
-            楽曲名  = st.text_input("楽曲名 *", placeholder="ロキ")
-            歌唱順  = st.number_input("歌唱順 *", min_value=1, value=1, step=1)
-            原曲    = st.text_input("原曲Artist", placeholder="niki")
-            リリース = st.text_input("リリース日", placeholder="2019-06-21")
-        c3, c4 = st.columns(2)
-        with c3:
-            作詞 = st.text_input("作詞", placeholder="niki")
-        with c4:
-            作曲 = st.text_input("作曲", placeholder="niki")
-        submitted = st.form_submit_button("✅ 追加してGitHubにコミット", type="primary", use_container_width=True)
-
-    if submitted:
-        if not 枠名 or not 楽曲名:
-            st.error("枠名と楽曲名は必須です。")
-        else:
-            new_row = pd.DataFrame([{
-                "枠名": 枠名, "楽曲名": 楽曲名, "歌唱順": int(歌唱順),
-                "配信日": str(配信日), "枠URL": 枠URL,
-                "コラボ相手様": コラボ if コラボ else "なし",
-                "原曲Artist": 原曲, "作詞": 作詞, "作曲": 作曲, "リリース日": リリース,
-            }])
-            updated = pd.concat([df, new_row], ignore_index=True)
-            ok, msg = push_df(updated, commit_msg=f"Add: {枠名} - {楽曲名}")
-            if ok:
-                st.success(f"「{楽曲名}」を追加し、GitHubにコミットしました。")
-                st.cache_data.clear()
-                st.rerun()
-            else:
-                st.error(msg)
-
-    st.divider()
-
     # ── Excelインポート ──
     st.subheader("📊 Excelから一括インポート（深影データ自動変換）")
     st.info(
@@ -533,7 +491,7 @@ def page_data_management(df: pd.DataFrame):
         st.download_button(
             label="⬇️ CSVダウンロード",
             data=csv_bytes,
-            file_name="streaming_info.csv",
+            file_name="streaming_info_mikage.csv",
             mime="text/csv",
             use_container_width=True,
         )
@@ -633,16 +591,8 @@ def main():
         unsafe_allow_html=True,
     )
 
-    tab1, tab2, tab3 = st.tabs(["🎙 LiveStreaming Info", "🎵 Uta-Mita DB", "⚙️ Data Management"])
-
     df = get_data()
-
-    with tab1:
-        page_streams(df)
-    with tab2:
-        page_songs(df)
-    with tab3:
-        page_data_management(df)
+    page_data_management(df)
 
 
 if __name__ == "__main__":
