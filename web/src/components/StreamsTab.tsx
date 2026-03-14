@@ -163,11 +163,12 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
 
       <div
         style={{
-          maxHeight: isOpen ? '1000px' : '0',
-          overflow: 'hidden',
-          transition: 'max-height 0.35s ease',
+          display: 'grid',
+          gridTemplateRows: isOpen ? '1fr' : '0fr',
+          transition: 'grid-template-rows 0.38s ease',
         }}
       >
+        <div style={{ overflow: 'hidden' }}>
         <div className="expander-body">
           <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '16px' }}>
             {/* サムネイル */}
@@ -235,6 +236,7 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
               </table>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
