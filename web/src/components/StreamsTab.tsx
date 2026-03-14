@@ -112,6 +112,9 @@ export default function StreamsTab({ records }: Props) {
           const cleanUrl = videoId
             ? `https://www.youtube.com/live/${videoId}`
             : stream.枠URL
+          const hasCollab = setlist.some(
+            (r) => r.コラボ相手様 && r.コラボ相手様 !== 'なし'
+          )
 
           return (
             <StreamExpander
@@ -123,6 +126,7 @@ export default function StreamsTab({ records }: Props) {
               cleanUrl={cleanUrl}
               setlist={setlist}
               query={trimmedQuery}
+              hasCollab={hasCollab}
             />
           )
         })}
@@ -139,9 +143,10 @@ interface ExpanderProps {
   cleanUrl: string
   setlist: StreamingRecord[]
   query: string
+  hasCollab: boolean
 }
 
-function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, setlist, query }: ExpanderProps) {
+function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, setlist, query, hasCollab }: ExpanderProps) {
   const [localOpen, setLocalOpen] = useState(defaultOpen)
   const isOpen = forceOpen || localOpen
 
@@ -195,7 +200,7 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
                   <tr>
                     <th>#</th>
                     <th>楽曲名</th>
-                    <th>コラボ相手様</th>
+                    {hasCollab && <th>コラボ相手様</th>}
                     <th>URL</th>
                   </tr>
                 </thead>
@@ -211,7 +216,11 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
                         <td style={isHit ? { fontWeight: 600, color: '#5fcf80' } : undefined}>
                           {r.楽曲名}
                         </td>
-                        <td style={{ color: '#888888' }}>{r.コラボ相手様 === 'なし' ? '' : r.コラボ相手様}</td>
+                        {hasCollab && (
+                          <td style={{ color: '#888888' }}>
+                            {r.コラボ相手様 && r.コラボ相手様 !== 'なし' ? r.コラボ相手様 : ''}
+                          </td>
+                        )}
                         <td>
                           {r.枠URL && (
                             <a href={r.枠URL} target="_blank" rel="noopener noreferrer" style={{ color: '#6a9e6a' }}>
