@@ -24,6 +24,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('streams')
+  const [mobileContentOpen, setMobileContentOpen] = useState(false)
 
   useEffect(() => {
     fetch(CSV_URL)
@@ -48,7 +49,7 @@ export default function App() {
         <img src={BANNER_URL} alt="妃玖 バナー" />
       </div>
 
-      {/* タブ */}
+      {/* タブ（PC） */}
       <div className="tabs">
         <button
           className={`tab-btn ${activeTab === 'streams' ? 'active' : ''}`}
@@ -78,6 +79,37 @@ export default function App() {
           <img src={SNAKE_ICON} alt="" className="tab-icon" />
           更新履歴
         </button>
+      </div>
+
+      {/* モバイルナビ（スマホのみ表示） */}
+      <div className="mobile-nav">
+        <div className="mobile-nav-content-wrap">
+          <button
+            className={`mobile-nav-main-btn${activeTab !== 'about' ? ' mobile-active' : ''}`}
+            onClick={() => setMobileContentOpen((v) => !v)}
+          >
+            Content
+            <span className={`mobile-nav-caret${mobileContentOpen ? ' open' : ''}`}>▾</span>
+          </button>
+          <div className={`mobile-nav-dropdown${mobileContentOpen ? ' open' : ''}`}>
+            <button
+              className={activeTab === 'streams' ? 'mobile-active' : ''}
+              onClick={() => { setActiveTab('streams'); setMobileContentOpen(false) }}
+            >LiveStreaming Info</button>
+            <button
+              className={activeTab === 'songs' ? 'mobile-active' : ''}
+              onClick={() => { setActiveTab('songs'); setMobileContentOpen(false) }}
+            >Uta-Mita DB</button>
+            <button
+              className={activeTab === 'changelog' ? 'mobile-active' : ''}
+              onClick={() => { setActiveTab('changelog'); setMobileContentOpen(false) }}
+            >更新履歴</button>
+          </div>
+        </div>
+        <button
+          className={`mobile-nav-main-btn${activeTab === 'about' ? ' mobile-active' : ''}`}
+          onClick={() => { setActiveTab('about'); setMobileContentOpen(false) }}
+        >About</button>
       </div>
 
       {/* コンテンツ */}
