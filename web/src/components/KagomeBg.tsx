@@ -6,7 +6,7 @@ const N_PARTICLES   = 38       // パーティクル数
 const SPEED_BASE    = 0.0095   // 基本速度 (t/frame)
 const SPEED_VAR     = 0.0060   // 速度ばらつき
 const TRAIL_LEN     = 16       // トレイル長
-const LINE_ALPHA    = 0.045    // 籠目ライン不透明度
+const LINE_ALPHA    = 0.10     // 籠目ライン不透明度
 const RGB           = '95,207,128' // #5fcf80
 
 // ── 型 ──────────────────────────────────────────────
@@ -154,61 +154,14 @@ export default function KagomeBg() {
       bgCtx.stroke()
     }
 
-    // ── 毎フレーム ──
-    function frame() {
+    // ── 静的描画（1回だけ）──
+    function draw() {
       ctx.clearRect(0, 0, cv.width, cv.height)
       if (bg) ctx.drawImage(bg, 0, 0)
-
-      for (const p of ps) {
-        // 位置を進める
-        p.t += p.spd
-        const nA = ns[p.from], nB = ns[p.to]
-        const tc = Math.min(p.t, 1)
-        const x  = nA.x + (nB.x - nA.x) * tc
-        const y  = nA.y + (nB.y - nA.y) * tc
-
-        // 循環バッファにトレイル記録
-        p.trail[p.head * 2]     = x
-        p.trail[p.head * 2 + 1] = y
-        p.head = (p.head + 1) % TRAIL_LEN
-        if (p.head === 0) p.filled = true
-
-        // ノード到達 → 次辺を選択
-        if (p.t >= 1) {
-          p.t -= 1
-          const prev    = p.from
-          p.from        = p.to
-          const choices = ns[p.to].nb.filter(n => n !== prev)
-          p.to = choices.length > 0
-            ? choices[(Math.random() * choices.length) | 0]
-            : prev
-        }
-
-        // トレイル描画（古→新の順）
-        const len = p.filled ? TRAIL_LEN : p.head
-        for (let s = 0; s < len; s++) {
-          const idx = (p.head - len + s + TRAIL_LEN * 2) % TRAIL_LEN
-          const tx  = p.trail[idx * 2]
-          const ty  = p.trail[idx * 2 + 1]
-          const frac = (s + 1) / len
-          ctx.beginPath()
-          ctx.arc(tx, ty, 0.2 + frac * 0.5, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${RGB},${frac * 0.30})`
-          ctx.fill()
-        }
-
-        // 先頭の輝点
-        ctx.beginPath()
-        ctx.arc(x, y, 0.9, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${RGB},0.50)`
-        ctx.fill()
-      }
-
-      raf = requestAnimationFrame(frame)
     }
 
     init()
-    frame()
+    draw()
 
     // リサイズ対応（200ms デバウンス）
     let timer = 0
@@ -219,7 +172,6 @@ export default function KagomeBg() {
     window.addEventListener('resize', onResize)
 
     return () => {
-      cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
       clearTimeout(timer)
     }
