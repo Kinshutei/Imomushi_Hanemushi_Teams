@@ -5,6 +5,7 @@ import StreamsTab from './components/StreamsTab'
 import SongsTab from './components/SongsTab'
 import AboutTab from './components/AboutTab'
 import ChangelogTab from './components/ChangelogTab'
+import KagomeBg from './components/KagomeBg'
 import './App.css'
 
 const CSV_URL =
@@ -43,94 +44,98 @@ export default function App() {
   }, [])
 
   return (
-    <div className="app">
-      {/* バナー */}
-      <div className="banner">
-        <img src={BANNER_URL} alt="妃玖 バナー" />
-      </div>
+    <>
+      <KagomeBg />
 
-      {/* タブ（PC） */}
-      <div className="tabs">
-        <button
-          className={`tab-btn ${activeTab === 'streams' ? 'active' : ''}`}
-          onClick={() => setActiveTab('streams')}
-        >
-          <img src={SNAKE_ICON} alt="" className="tab-icon" />
-          LiveStreaming Info
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'songs' ? 'active' : ''}`}
-          onClick={() => setActiveTab('songs')}
-        >
-          <img src={SNAKE_ICON} alt="" className="tab-icon" />
-          Uta-Mita DB
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
-          onClick={() => setActiveTab('about')}
-        >
-          <img src={SNAKE_ICON} alt="" className="tab-icon" />
-          About
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'changelog' ? 'active' : ''}`}
-          onClick={() => setActiveTab('changelog')}
-        >
-          <img src={SNAKE_ICON} alt="" className="tab-icon" />
-          更新履歴
-        </button>
-      </div>
-
-      {/* モバイルナビ（スマホのみ表示） */}
-      <div className="mobile-nav">
-        <div className="mobile-nav-content-wrap">
-          <button
-            className={`mobile-nav-main-btn${activeTab !== 'about' ? ' mobile-active' : ''}`}
-            onClick={() => setMobileContentOpen((v) => !v)}
-          >
-            Content
-            <span className={`mobile-nav-caret${mobileContentOpen ? ' open' : ''}`}>▾</span>
-          </button>
-          <div className={`mobile-nav-dropdown${mobileContentOpen ? ' open' : ''}`}>
-            <button
-              className={activeTab === 'streams' ? 'mobile-active' : ''}
-              onClick={() => { setActiveTab('streams'); setMobileContentOpen(false) }}
-            >LiveStreaming Info</button>
-            <button
-              className={activeTab === 'songs' ? 'mobile-active' : ''}
-              onClick={() => { setActiveTab('songs'); setMobileContentOpen(false) }}
-            >Uta-Mita DB</button>
-            <button
-              className={activeTab === 'changelog' ? 'mobile-active' : ''}
-              onClick={() => { setActiveTab('changelog'); setMobileContentOpen(false) }}
-            >更新履歴</button>
-          </div>
+      <div className="app">
+        {/* バナー */}
+        <div className="banner">
+          <img src={BANNER_URL} alt="妃玖 バナー" />
         </div>
-        <button
-          className={`mobile-nav-main-btn${activeTab === 'about' ? ' mobile-active' : ''}`}
-          onClick={() => { setActiveTab('about'); setMobileContentOpen(false) }}
-        >About</button>
-      </div>
 
-      {/* コンテンツ */}
-      <div className="content">
-        {activeTab === 'about' ? (
-          <AboutTab />
-        ) : activeTab === 'changelog' ? (
-          <ChangelogTab />
-        ) : (
-          <>
-            {loading && <p style={{ color: '#888' }}>読み込み中...</p>}
-            {error && <p style={{ color: '#c00' }}>データの取得に失敗しました: {error}</p>}
-            {!loading && !error && (
-              <>
-                {activeTab === 'streams' && <StreamsTab records={records} />}
-                {activeTab === 'songs' && <SongsTab records={records} />}
-              </>
-            )}
-          </>
-        )}
+        {/* タブ（PC） */}
+        <div className="tabs">
+          <button
+            className={`tab-btn ${activeTab === 'streams' ? 'active' : ''}`}
+            onClick={() => setActiveTab('streams')}
+          >
+            <img src={SNAKE_ICON} alt="" className="tab-icon" />
+            LiveStreaming Info
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'songs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('songs')}
+          >
+            <img src={SNAKE_ICON} alt="" className="tab-icon" />
+            Uta-Mita DB
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
+            onClick={() => setActiveTab('about')}
+          >
+            <img src={SNAKE_ICON} alt="" className="tab-icon" />
+            About
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'changelog' ? 'active' : ''}`}
+            onClick={() => setActiveTab('changelog')}
+          >
+            <img src={SNAKE_ICON} alt="" className="tab-icon" />
+            更新履歴
+          </button>
+        </div>
+
+        {/* モバイルナビ（スマホのみ表示） */}
+        <div className="mobile-nav">
+          <div className="mobile-nav-content-wrap">
+            <button
+              className={`mobile-nav-main-btn${activeTab !== 'about' ? ' mobile-active' : ''}`}
+              onClick={() => setMobileContentOpen((v) => !v)}
+            >
+              Content
+              <span className={`mobile-nav-caret${mobileContentOpen ? ' open' : ''}`}>▾</span>
+            </button>
+            <div className={`mobile-nav-dropdown${mobileContentOpen ? ' open' : ''}`}>
+              <button
+                className={activeTab === 'streams' ? 'mobile-active' : ''}
+                onClick={() => { setActiveTab('streams'); setMobileContentOpen(false) }}
+              >LiveStreaming Info</button>
+              <button
+                className={activeTab === 'songs' ? 'mobile-active' : ''}
+                onClick={() => { setActiveTab('songs'); setMobileContentOpen(false) }}
+              >Uta-Mita DB</button>
+              <button
+                className={activeTab === 'changelog' ? 'mobile-active' : ''}
+                onClick={() => { setActiveTab('changelog'); setMobileContentOpen(false) }}
+              >更新履歴</button>
+            </div>
+          </div>
+          <button
+            className={`mobile-nav-main-btn${activeTab === 'about' ? ' mobile-active' : ''}`}
+            onClick={() => { setActiveTab('about'); setMobileContentOpen(false) }}
+          >About</button>
+        </div>
+
+        {/* コンテンツ */}
+        <div className="content">
+          {activeTab === 'about' ? (
+            <AboutTab />
+          ) : activeTab === 'changelog' ? (
+            <ChangelogTab />
+          ) : (
+            <>
+              {loading && <p style={{ color: '#888' }}>読み込み中...</p>}
+              {error && <p style={{ color: '#c00' }}>データの取得に失敗しました: {error}</p>}
+              {!loading && !error && (
+                <>
+                  {activeTab === 'streams' && <StreamsTab records={records} />}
+                  {activeTab === 'songs' && <SongsTab records={records} />}
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
