@@ -1,48 +1,36 @@
 import { useEffect, useRef } from 'react'
 
 // ── 定数 ────────────────────────────────────────────
-const R             = 38       // ノード間距離 (px)
-const N_PARTICLES   = 38       // パーティクル数
-const SPEED_BASE    = 0.0095   // 基本速度 (t/frame)
-const SPEED_VAR     = 0.0060   // 速度ばらつき
-const TRAIL_LEN     = 16       // トレイル長
-const LINE_ALPHA    = 0.10     // 籠目ライン不透明度
-const RGB           = '95,207,128' // #5fcf80
+const R           = 38          // ノード間距離 (px)
+const N_PARTICLES = 38          // パーティクル数
+const SPEED_BASE  = 0.0095      // 基本速度 (t/frame)
+const SPEED_VAR   = 0.0060      // 速度ばらつき
+const TRAIL_LEN   = 16          // トレイル長
+const LINE_ALPHA  = 0.10        // 籠目ライン不透明度
+const RGB         = '95,207,128' // #5fcf80
 
 // ── 型 ──────────────────────────────────────────────
 interface GNode { x: number; y: number; nb: number[] }
 
 interface Particle {
-  from: number
-  to:   number
-  t:    number
-  spd:  number
-  // 循環バッファによるトレイル (x,y 交互格納)
-  trail: Float32Array
-  head:  number  // 書き込み位置
+  from:   number
+  to:     number
+  t:      number
+  spd:    number
+  trail:  Float32Array
+  head:   number
   filled: boolean
 }
 
 // ── 籠目グラフ構築 ──────────────────────────────────
-//
-//  単位胞ベクトル: b1=(2R,0), b2=(R, R√3)
-//  胞内3サイト:
-//    P(i,j) = i·b1 + j·b2
-//    Q(i,j) = P + (R, 0)
-//    R(i,j) = P + (R/2, R√3/2)
-//
-//  辺6種（各ノードの次数=4 を確認済）:
-//    胞内 : P-Q, Q-R, R-P
-//    胞間 : Q(i,j)-P(i+1,j),  R(i,j)-P(i,j+1),  R(i,j)-Q(i-1,j+1)
-//
 function buildKagome(W: number, H: number): GNode[] {
   const sq3 = Math.sqrt(3)
   const b1x = 2 * R
-  const b2x = R,  b2y = R * sq3
+  const b2x = R, b2y = R * sq3
+  const M   = R * 3
 
   const map = new Map<string, number>()
   const ns: GNode[] = []
-  const M = R * 3  // 描画マージン
 
   const key = (x: number, y: number) =>
     `${Math.round(x)},${Math.round(y)}`
@@ -74,23 +62,16 @@ function buildKagome(W: number, H: number): GNode[] {
       const bx = i * b1x + j * b2x
       const by = j * b2y
 
-      const px = bx,           py = by
-      const qx = bx + R,       qy = by
-      const rx = bx + R * .5,  ry = by + R * sq3 * .5
+      const px = bx,          py = by
+      const qx = bx + R,      qy = by
+      const rx = bx + R * .5, ry = by + R * sq3 * .5
 
-      // 胞内
       link(px, py, qx, qy)
       link(qx, qy, rx, ry)
       link(rx, ry, px, py)
-
-      // Q(i,j) – P(i+1,j)
-      link(qx, qy, bx + b1x, by)
-
-      // R(i,j) – P(i,j+1)
-      link(rx, ry, bx + b2x, by + b2y)
-
-      // R(i,j) – Q(i-1,j+1)
-      link(rx, ry, bx - b1x + b2x + R, by + b2y)
+      link(qx, qy, bx + b1x,              by)
+      link(rx, ry, bx + b2x,              by + b2y)
+      link(rx, ry, bx - b1x + b2x + R,   by + b2y)
     }
   }
 
@@ -119,10 +100,10 @@ export default function KagomeBg() {
   useEffect(() => {
     const cv  = ref.current!
     const ctx = cv.getContext('2d')!
-    let raf   = 0
-    let ns:  GNode[]    = []
-    let ps:  Particle[] = []
-    let bg:  HTMLCanvasElement | null = null
+    let rafId = 0
+    let ns: GNode[]    = []
+    let ps: Particle[] = []
+    let bg: HTMLCanvasElement | null = null
 
     // ── 初期化 ──
     function init() {
@@ -135,9 +116,9 @@ export default function KagomeBg() {
       ps = Array.from({ length: N_PARTICLES }, () => spawn(ns))
 
       // 静的パターンをオフスクリーンCanvasに事前描画
-      bg         = document.createElement('canvas')
-      bg.width   = W
-      bg.height  = H
+      bg        = document.createElement('canvas')
+      bg.width  = W
+      bg.height = H
       const bgCtx = bg.getContext('2d')!
       bgCtx.strokeStyle = `rgba(${RGB},${LINE_ALPHA})`
       bgCtx.lineWidth   = 0.6
@@ -154,14 +135,60 @@ export default function KagomeBg() {
       bgCtx.stroke()
     }
 
-    // ── 静的描画（1回だけ）──
-    function draw() {
+    // ── 毎フレーム ──
+    function frame() {
       ctx.clearRect(0, 0, cv.width, cv.height)
       if (bg) ctx.drawImage(bg, 0, 0)
+
+      for (const p of ps) {
+        p.t += p.spd
+        const nA = ns[p.from], nB = ns[p.to]
+        const tc = Math.min(p.t, 1)
+        const x  = nA.x + (nB.x - nA.x) * tc
+        const y  = nA.y + (nB.y - nA.y) * tc
+
+        // 循環バッファにトレイル記録
+        p.trail[p.head * 2]     = x
+        p.trail[p.head * 2 + 1] = y
+        p.head = (p.head + 1) % TRAIL_LEN
+        if (p.head === 0) p.filled = true
+
+        // ノード到達 → 次辺を選択
+        if (p.t >= 1) {
+          p.t -= 1
+          const prev    = p.from
+          p.from        = p.to
+          const choices = ns[p.to].nb.filter(n => n !== prev)
+          p.to = choices.length > 0
+            ? choices[(Math.random() * choices.length) | 0]
+            : prev
+        }
+
+        // トレイル描画（古→新の順）
+        const len = p.filled ? TRAIL_LEN : p.head
+        for (let s = 0; s < len; s++) {
+          const idx = (p.head - len + s + TRAIL_LEN * 2) % TRAIL_LEN
+          const tx  = p.trail[idx * 2]
+          const ty  = p.trail[idx * 2 + 1]
+          const frac = (s + 1) / len
+          ctx.beginPath()
+          ctx.arc(tx, ty, 0.2 + frac * 0.5, 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${RGB},${frac * 0.30})`
+          ctx.fill()
+        }
+
+        // 先頭の輝点
+        ctx.beginPath()
+        ctx.arc(x, y, 0.9, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${RGB},0.50)`
+        ctx.fill()
+      }
+
+      rafId = requestAnimationFrame(frame)
     }
 
     init()
-    draw()
+    frame()
 
     // リサイズ対応（200ms デバウンス）
     let timer = 0
@@ -172,6 +199,7 @@ export default function KagomeBg() {
     window.addEventListener('resize', onResize)
 
     return () => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('resize', onResize)
       clearTimeout(timer)
     }
