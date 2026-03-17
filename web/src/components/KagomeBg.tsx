@@ -6,7 +6,7 @@ const N_PARTICLES   = 38       // パーティクル数
 const SPEED_BASE    = 0.0095   // 基本速度 (t/frame)
 const SPEED_VAR     = 0.0060   // 速度ばらつき
 const TRAIL_LEN     = 16       // トレイル長
-const LINE_ALPHA    = 0.075    // 籠目ライン不透明度
+const LINE_ALPHA    = 0.045    // 籠目ライン不透明度
 const RGB           = '95,207,128' // #5fcf80
 
 // ── 型 ──────────────────────────────────────────────
@@ -192,15 +192,15 @@ export default function KagomeBg() {
           const ty  = p.trail[idx * 2 + 1]
           const frac = (s + 1) / len
           ctx.beginPath()
-          ctx.arc(tx, ty, 0.7 + frac * 1.4, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${RGB},${frac * 0.65})`
+          ctx.arc(tx, ty, 0.2 + frac * 0.5, 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${RGB},${frac * 0.30})`
           ctx.fill()
         }
 
         // 先頭の輝点
         ctx.beginPath()
-        ctx.arc(x, y, 2.6, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${RGB},0.92)`
+        ctx.arc(x, y, 0.9, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${RGB},0.50)`
         ctx.fill()
       }
 
