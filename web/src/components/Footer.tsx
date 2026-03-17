@@ -10,7 +10,7 @@ export default function Footer() {
       borderTop: '1px solid #222',
       textAlign: 'center',
       fontSize: '11px',
-      color: '#404040',
+      color: '#707070',
       letterSpacing: '0.06em',
       fontFamily: "'Noto Sans JP', sans-serif",
       zIndex: 200,
@@ -20,7 +20,7 @@ export default function Footer() {
         href="https://x.com/WL_GE_inn"
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: '#505050', textDecoration: 'none' }}
+        style={{ color: '#888', textDecoration: 'none' }}
       >
         kinshutei
       </a>
@@ -30,7 +30,7 @@ export default function Footer() {
         href="https://x.com/WL_GE_inn"
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: '#505050', textDecoration: 'none' }}
+        style={{ color: '#888', textDecoration: 'none' }}
       >
         @WL_GE_inn
       </a>
