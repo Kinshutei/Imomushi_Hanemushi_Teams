@@ -32,6 +32,8 @@ body {
   max-width: 1300px;
   margin: 0 auto;
   padding: 0 0 60px;
+  position: relative;
+  z-index: 1;
 }
 
 /* ── バナー ── */
@@ -170,10 +172,8 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-size: 17px;
-  /* 列幅をコンテンツではなく指定値で固定する */
   table-layout: fixed;
 }
-/* th・td 共通：左寄せ */
 .setlist-table th,
 .setlist-table td {
   text-align: left;
@@ -192,7 +192,6 @@ body {
 .setlist-table td {
   color: #c0c0c0;
 }
-/* 列幅指定（# / 楽曲名 / 原曲アーティスト / URL） */
 .setlist-table th:nth-child(1),
 .setlist-table td:nth-child(1) { width: 44px;  text-align: center; color: #606060; }
 .setlist-table th:nth-child(2),
