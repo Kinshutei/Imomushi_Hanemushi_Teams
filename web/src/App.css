@@ -90,10 +90,6 @@ body {
   border-bottom-color: #5fcf80;
 }
 
-/* 🐍 タブアイコン
-   PNG = 黒蛇＋白背景。invert(1)で白蛇＋黒背景に反転。
-   黒背景はページ背景(#0e0e0e)に溶け込み、白い蛇だけ浮かぶ。
-   アクティブ時は sepia＋hue-rotate で蛇を緑に。 */
 .tab-icon {
   height: 22px;
   width: 22px;
@@ -174,19 +170,38 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-size: 17px;
+  /* 列幅をコンテンツではなく指定値で固定する */
+  table-layout: fixed;
+}
+/* th・td 共通：左寄せ */
+.setlist-table th,
+.setlist-table td {
   text-align: left;
   padding: 5px 10px;
+  border-bottom: 1px solid #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.setlist-table th {
   border-bottom: 1px solid #2a2a2a;
   color: #606060;
   font-weight: 500;
-  white-space: nowrap;
   letter-spacing: 0.03em;
 }
 .setlist-table td {
-  padding: 5px 10px;
-  border-bottom: 1px solid #1a1a1a;
   color: #c0c0c0;
 }
+/* 列幅指定（# / 楽曲名 / 原曲アーティスト / URL） */
+.setlist-table th:nth-child(1),
+.setlist-table td:nth-child(1) { width: 44px;  text-align: center; color: #606060; }
+.setlist-table th:nth-child(2),
+.setlist-table td:nth-child(2) { width: 45%; }
+.setlist-table th:nth-child(3),
+.setlist-table td:nth-child(3) { width: auto; }
+.setlist-table th:nth-child(4),
+.setlist-table td:nth-child(4) { width: 76px; }
+
 .setlist-table tr:last-child td { border-bottom: none; }
 .setlist-table tr:hover td { background: #1a1a1a; }
 .setlist-table a { color: #5fcf80; text-decoration: none; }
@@ -219,7 +234,6 @@ body {
   color: #c0c0c0;
   white-space: nowrap;
 }
-/* 各列のmin-width（コンテンツ最大幅から算出） */
 .songs-table th:nth-child(1), .songs-table td:nth-child(1) { min-width: 224px; }
 .songs-table th:nth-child(2), .songs-table td:nth-child(2) { min-width: 231px; }
 .songs-table th:nth-child(3), .songs-table td:nth-child(3) { min-width: 209px; }
@@ -251,10 +265,8 @@ a:hover { color: #8de0a0; }
 
 /* ── レスポンシブ ── */
 @media (max-width: 600px) {
-  /* PC タブ非表示 */
   .tabs { display: none; }
 
-  /* モバイルナビ表示 */
   .mobile-nav {
     display: flex;
     align-items: flex-start;
@@ -305,7 +317,6 @@ a:hover { color: #8de0a0; }
     transform: rotate(180deg);
   }
 
-  /* ドロップダウン（max-heightで制御：3項目固定なので十分） */
   .mobile-nav-dropdown {
     overflow: hidden;
     max-height: 0;
@@ -335,10 +346,8 @@ a:hover { color: #8de0a0; }
     border-left-color: #5fcf80;
   }
 
-  /* コンテンツエリア余白調整 */
   .content { padding: 16px 12px; }
 
-  /* アコーディオン内：スマホはサムネイルを上に縦積み */
   .expander-body > div {
     grid-template-columns: 1fr !important;
   }
