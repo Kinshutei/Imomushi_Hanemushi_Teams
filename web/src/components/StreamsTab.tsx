@@ -112,9 +112,6 @@ export default function StreamsTab({ records }: Props) {
           const cleanUrl = videoId
             ? `https://www.youtube.com/live/${videoId}`
             : stream.枠URL
-          const hasCollab = setlist.some(
-            (r) => r.コラボ相手様 && r.コラボ相手様 !== 'なし'
-          )
 
           return (
             <StreamExpander
@@ -126,7 +123,6 @@ export default function StreamsTab({ records }: Props) {
               cleanUrl={cleanUrl}
               setlist={setlist}
               query={trimmedQuery}
-              hasCollab={hasCollab}
             />
           )
         })}
@@ -143,10 +139,9 @@ interface ExpanderProps {
   cleanUrl: string
   setlist: StreamingRecord[]
   query: string
-  hasCollab: boolean
 }
 
-function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, setlist, query, hasCollab }: ExpanderProps) {
+function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, setlist, query }: ExpanderProps) {
   const [localOpen, setLocalOpen] = useState(defaultOpen)
   const isOpen = forceOpen || localOpen
 
@@ -201,13 +196,14 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
                   <tr>
                     <th>#</th>
                     <th>楽曲名</th>
-                    {hasCollab && <th>コラボ相手様</th>}
+                    <th>原曲アーティスト</th>
                     <th>URL</th>
                   </tr>
                 </thead>
                 <tbody>
                   {setlist.map((r, i) => {
                     const isHit = query.length > 0 && r.楽曲名.toLowerCase().includes(query.toLowerCase())
+                    const hasCollab = r.コラボ相手様 && r.コラボ相手様 !== 'なし'
                     return (
                       <tr
                         key={i}
@@ -215,13 +211,27 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
                       >
                         <td style={{ textAlign: 'center', color: '#606060' }}>{r.歌唱順}</td>
                         <td style={isHit ? { fontWeight: 600, color: '#5fcf80' } : undefined}>
-                          {r.楽曲名}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            {r.楽曲名}
+                            {hasCollab && (
+                              <span style={{
+                                display: 'inline-block',
+                                fontSize: '11px',
+                                lineHeight: 1,
+                                padding: '2px 6px',
+                                borderRadius: '10px',
+                                background: 'rgba(95,207,128,0.15)',
+                                border: '1px solid rgba(95,207,128,0.35)',
+                                color: '#7dcc96',
+                                whiteSpace: 'nowrap',
+                                fontWeight: 500,
+                              }}>
+                                🎤 {r.コラボ相手様}
+                              </span>
+                            )}
+                          </span>
                         </td>
-                        {hasCollab && (
-                          <td style={{ color: '#888888' }}>
-                            {r.コラボ相手様 && r.コラボ相手様 !== 'なし' ? r.コラボ相手様 : ''}
-                          </td>
-                        )}
+                        <td style={{ color: '#666' }}>{r.原曲Artist}</td>
                         <td>
                           {r.枠URL && (
                             <a href={r.枠URL} target="_blank" rel="noopener noreferrer" style={{ color: '#6a9e6a' }}>
