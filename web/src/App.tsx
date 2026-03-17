@@ -6,6 +6,7 @@ import SongsTab from './components/SongsTab'
 import AboutTab from './components/AboutTab'
 import ChangelogTab from './components/ChangelogTab'
 import KagomeBg from './components/KagomeBg'
+import Footer from './components/Footer'
 import './App.css'
 
 const CSV_URL =
@@ -136,6 +137,7 @@ export default function App() {
           )}
         </div>
       </div>
+      <Footer />
     </>
   )
 }
