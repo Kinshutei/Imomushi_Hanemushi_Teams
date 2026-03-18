@@ -41,7 +41,7 @@ body {
   width: 100%;
   line-height: 0;
   position: relative;
-  background: #0e0e0e; /* 帯の背景色 */
+  background: #0e0e0e;
 }
 .banner::after {
   content: '';
@@ -58,7 +58,6 @@ body {
   max-height: 240px;
   object-fit: cover;
   display: block;
-  /* 左右フェード */
   mask-image: linear-gradient(
     to right,
     transparent 0%,
@@ -209,7 +208,7 @@ body {
   color: #c0c0c0;
 }
 .setlist-table th:nth-child(1),
-.setlist-table td:nth-child(1) { width: 44px;  text-align: center; color: #606060; }
+.setlist-table td:nth-child(1) { width: 44px; text-align: center; color: #606060; }
 .setlist-table th:nth-child(2),
 .setlist-table td:nth-child(2) { width: 45%; }
 .setlist-table th:nth-child(3),
@@ -273,6 +272,10 @@ h3 {
 a { color: #5fcf80; }
 a:hover { color: #8de0a0; }
 
+/* ── フッターテキスト出し分け（PC: full表示 / スマホ: short表示） ── */
+.footer-full  { display: inline; }
+.footer-short { display: none; }
+
 /* ── モバイルナビ（PC非表示） ── */
 .mobile-nav {
   display: none;
@@ -281,6 +284,9 @@ a:hover { color: #8de0a0; }
 /* ── レスポンシブ ── */
 @media (max-width: 600px) {
   .tabs { display: none; }
+
+  .footer-full  { display: none; }
+  .footer-short { display: inline; }
 
   .mobile-nav {
     display: flex;
