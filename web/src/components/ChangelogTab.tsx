@@ -1,6 +1,13 @@
 export default function ChangelogTab() {
   const entries = [
     {
+      date: '2026-03-17',
+      items: [
+        '背景に籠目模様とアニメーションを試験的に追加',
+        'LiveStreaming Info タブの枠情報に関するデザインを更新',
+      ],
+    },
+    {
       date: '2026-03-13',
       items: ['サイト公開'],
     },
