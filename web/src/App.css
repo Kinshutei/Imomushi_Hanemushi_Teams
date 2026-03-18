@@ -369,6 +369,8 @@ a:hover { color: #8de0a0; }
 
   .content { padding: 16px 12px; }
 
+  .btn-secondary { font-size: 13px; padding: 4px 10px; }
+
   .expander-body > div {
     grid-template-columns: 1fr !important;
   }
