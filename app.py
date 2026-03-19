@@ -634,16 +634,9 @@ def main():
         unsafe_allow_html=True,
     )
 
-    tab1, tab2, tab3 = st.tabs(["LiveStreaming Info", "Uta-Mita DB", "Data Management"])
-
     streaming, master, joined = get_data()
 
-    with tab1:
-        page_streams(joined)
-    with tab2:
-        page_songs(joined)
-    with tab3:
-        page_data_management(streaming, master)
+    page_data_management(streaming, master)
 
     if st.session_state.get("authenticated") or "admin_password" not in st.secrets:
         with st.expander("🔍 接続診断", expanded=False):
