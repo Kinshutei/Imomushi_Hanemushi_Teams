@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import Plot from 'react-plotly.js'
 import { StreamingRecord, SongStat } from '../types'
-import { aggregateSongs } from '../utils/csv'
+import { aggregateSongs, toReleaseYear } from '../utils/csv'
 
 interface Props {
   records: StreamingRecord[]
@@ -16,7 +16,6 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: '作詞',             label: '作詞' },
   { key: '作曲',             label: '作曲' },
   { key: 'リリース日',       label: 'リリース日' },
-  { key: 'リリース年',       label: 'リリース年' },
   { key: '歌唱回数',         label: '歌唱回数' },
 ]
 
@@ -37,7 +36,6 @@ function sortSongs(songs: SongStat[], key: SortKey, dir: SortDir): SongStat[] {
 export default function SongsTab({ records }: Props) {
   const songs: SongStat[] = useMemo(() => aggregateSongs(records), [records])
 
-  // ── ソート状態（初期: 歌唱回数降順）──
   const [sortKey, setSortKey] = useState<SortKey>('歌唱回数')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
@@ -46,30 +44,30 @@ export default function SongsTab({ records }: Props) {
     [songs, sortKey, sortDir]
   )
 
-  // グラフは元の集計順（歌唱回数降順）を維持
+  // グラフは歌唱回数降順を維持
   const top20 = songs.slice(0, 20)
 
-  // ── グラフリセット用キー ──
   const [barKey, setBarKey] = useState(0)
-  const [treeKey, setTreeKey] = useState(0)
+  const [yearBarKey, setYearBarKey] = useState(0)
   const [treeKey2, setTreeKey2] = useState(0)
 
-  // ── 横棒グラフ用データ ──
+  // 横棒グラフ用
   const maxCount = top20[0]?.歌唱回数 ?? 1
   const barColors = top20.map(
     (s) => `rgba(95,207,128,${0.2 + 0.7 * (s.歌唱回数 / maxCount)})`
   )
 
-  // ── リリース年ツリーマップ用データ ──
+  // リリース年棒グラフ用
   const yearMap = new Map<string, number>()
   for (const s of songs) {
-    if (!s.リリース年) continue
-    yearMap.set(s.リリース年, (yearMap.get(s.リリース年) ?? 0) + 1)
+    const y = toReleaseYear(s.リリース日)
+    if (!y) continue
+    yearMap.set(y, (yearMap.get(y) ?? 0) + 1)
   }
   const years = Array.from(yearMap.entries()).sort((a, b) => a[0].localeCompare(b[0]))
-  const yearTotal = years.reduce((sum, [, v]) => sum + v, 0)
+  const yearMaxVal = Math.max(...years.map(([, v]) => v), 1)
 
-  // ── 原曲アーティストツリーマップ用データ ──
+  // 原曲アーティストツリーマップ用
   const artistMap = new Map<string, number>()
   for (const s of songs) {
     const artist = s.原曲アーティスト?.trim()
@@ -97,13 +95,16 @@ export default function SongsTab({ records }: Props) {
     return <span style={{ color: '#6a9e6a', marginLeft: 4 }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
   }
 
+  // 1行あたり約36px、25行分でスクロール
+  const TABLE_MAX_HEIGHT = 25 * 36
+
   return (
     <div>
       {/* 曲一覧テーブル */}
       <p style={{ color: '#606060', fontSize: '14px', margin: '0 0 8px' }}>全 {sortedSongs.length} 曲</p>
-      <div style={{ overflowX: 'auto', marginBottom: '32px' }}>
+      <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: `${TABLE_MAX_HEIGHT}px`, marginBottom: '32px' }}>
         <table className="songs-table">
-          <thead>
+          <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
             <tr>
               {COLUMNS.map(({ key, label }) => (
                 <th
@@ -129,7 +130,6 @@ export default function SongsTab({ records }: Props) {
                 <td style={{ color: '#666' }}>{s.作詞}</td>
                 <td style={{ color: '#666' }}>{s.作曲}</td>
                 <td style={{ color: '#666' }}>{s.リリース日}</td>
-                <td style={{ color: '#666' }}>{s.リリース年}</td>
                 <td style={{ textAlign: 'center', fontWeight: 600, color: '#6a9e6a' }}>{s.歌唱回数}</td>
               </tr>
             ))}
@@ -137,11 +137,11 @@ export default function SongsTab({ records }: Props) {
         </table>
       </div>
 
-      {/* 横棒グラフ */}
+      {/* 歌唱回数ランキング横棒グラフ */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
         <h3 style={{ color: '#555', margin: 0 }}>歌唱回数ランキング（上位20曲）</h3>
         <button className="btn-secondary" onClick={() => setBarKey((k) => k + 1)} title="ズームをリセット">
-          🏠 リセット
+          リセット
         </button>
       </div>
       <Plot
@@ -161,9 +161,15 @@ export default function SongsTab({ records }: Props) {
           paper_bgcolor: 'rgba(0,0,0,0)',
           plot_bgcolor: 'rgba(0,0,0,0)',
           font: { family: 'Noto Sans JP', color: '#a0a0a0', size: 12 },
-          yaxis: { autorange: 'reversed', showgrid: false, tickfont: { size: 11 }, color: '#a0a0a0' },
+          yaxis: {
+            autorange: 'reversed',
+            showgrid: false,
+            tickfont: { size: 11 },
+            color: '#a0a0a0',
+            automargin: true,
+          },
           xaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.05)', zeroline: false, color: '#606060' },
-          margin: { l: 10, r: 55, t: 16, b: 10 },
+          margin: { l: 16, r: 55, t: 16, b: 10 },
           height: Math.max(380, top20.length * 26),
         }}
         config={{ displayModeBar: false, responsive: true }}
@@ -171,37 +177,47 @@ export default function SongsTab({ records }: Props) {
         useResizeHandler
       />
 
-      {/* ツリーマップ */}
+      {/* リリース年度分布（棒グラフ） */}
       {years.length > 0 && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '24px 0 8px' }}>
             <h3 style={{ color: '#555', margin: 0 }}>リリース年度分布</h3>
-            <button className="btn-secondary" onClick={() => setTreeKey((k) => k + 1)} title="ズームをリセット">
-              🏠 リセット
+            <button className="btn-secondary" onClick={() => setYearBarKey((k) => k + 1)} title="ズームをリセット">
+              リセット
             </button>
           </div>
           <Plot
-            key={treeKey}
+            key={yearBarKey}
             data={[{
-              type: 'treemap',
-              labels: years.map(([y]) => y),
-              parents: years.map(() => ''),
-              values: years.map(([, v]) => v),
-              text: years.map(([, v]) => `${(v / yearTotal * 100).toFixed(1)}%`),
-              texttemplate: '<b>%{label}</b><br>%{value}曲<br>%{text}',
-              hovertemplate: '<b>%{label}</b><br>%{value}曲 (%{text})<extra></extra>',
+              type: 'bar',
+              x: years.map(([y]) => y),
+              y: years.map(([, v]) => v),
+              text: years.map(([, v]) => String(v)),
+              textposition: 'outside',
               marker: {
-                colors: years.map(([, v]) => v),
-                colorscale: [[0.0,'#1a2e1a'],[0.4,'#2a4a2a'],[0.7,'#3a7a4a'],[1.0,'#5fcf80']],
-                line: { width: 2, color: '#ffffff' },
-                pad: { t: 22, l: 4, r: 4, b: 4 },
+                color: years.map(([, v]) => `rgba(95,207,128,${0.25 + 0.65 * (v / yearMaxVal)})`),
+                line: { width: 0 },
               },
+              hovertemplate: '<b>%{x}</b><br>%{y}曲<extra></extra>',
             }]}
             layout={{
               paper_bgcolor: 'rgba(0,0,0,0)',
-              font: { family: 'Noto Sans JP', color: '#c0c0c0' },
-              margin: { t: 4, l: 0, r: 0, b: 0 },
-              height: 380,
+              plot_bgcolor: 'rgba(0,0,0,0)',
+              font: { family: 'Noto Sans JP', color: '#a0a0a0', size: 11 },
+              xaxis: {
+                tickfont: { size: 10 },
+                color: '#606060',
+                tickangle: -45,
+                showgrid: false,
+              },
+              yaxis: {
+                showgrid: true,
+                gridcolor: 'rgba(255,255,255,0.05)',
+                zeroline: false,
+                color: '#606060',
+              },
+              margin: { l: 40, r: 20, t: 24, b: 70 },
+              height: 320,
             }}
             config={{ displayModeBar: false, responsive: true }}
             style={{ width: '100%' }}
@@ -216,7 +232,7 @@ export default function SongsTab({ records }: Props) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '24px 0 8px' }}>
             <h3 style={{ color: '#555', margin: 0 }}>原曲アーティスト分布</h3>
             <button className="btn-secondary" onClick={() => setTreeKey2((k) => k + 1)} title="ズームをリセット">
-              🏠 リセット
+              リセット
             </button>
           </div>
           <Plot
