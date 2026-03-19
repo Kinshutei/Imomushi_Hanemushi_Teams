@@ -44,6 +44,7 @@ jobs:
         env:
           # CSVのURL（同リポジトリのrawファイル）
           VITE_CSV_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/streaming_info.csv
+          VITE_MASTER_CSV_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/rkmusic_song_master.csv
 
       - uses: actions/upload-pages-artifact@v3
         with:
