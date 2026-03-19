@@ -25,7 +25,7 @@ export default function ChangelogTab() {
   ]
 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', lineHeight: 1.85, color: '#c0c0c0' }}>
+    <div style={{ lineHeight: 1.85, color: '#c0c0c0' }}>
       <section>
         <h3 style={{ color: '#5fcf80', fontSize: '1.1rem' }}>更新履歴</h3>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
