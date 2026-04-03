@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Node.js
+node_modules/
+web/node_modules/
+web/dist/
+package-lock.json
+web/package-lock.json
