@@ -54,7 +54,7 @@ export default function AboutTab() {
             padding: '14px 18px',
           }}>
             <div style={{ fontWeight: 700, color: '#b32e46', marginBottom: 6, fontSize: '0.95rem' }}>
-              🎵 Uta-Mita DB
+              🎵 Sung Repertoire
             </div>
             <p style={{ margin: 0, fontSize: '0.9rem', color: '#a0a0a0' }}>
               楽曲ごとの集計データです。列ヘッダーをクリックするとその列でソートできます。

@@ -57,7 +57,7 @@ export default function SongsTab({ records }: Props) {
   const [treeKey2, setTreeKey2] = useState(0)
 
   const maxCount = top20[0]?.歌唱回数 ?? 1
-  const barColors = top20.map((s) => `rgba(179,46,70,${0.25 + 0.75 * (s.歌唱回数 / maxCount)})`)
+  const barColors = top20.map((s) => `rgba(95,207,128,${0.25 + 0.75 * (s.歌唱回数 / maxCount)})`)
 
   const yearMap = new Map<string, number>()
   for (const s of songs) {
@@ -90,14 +90,14 @@ export default function SongsTab({ records }: Props) {
 
   const sortIndicator = (key: SortKey) => {
     if (sortKey !== key) return <span style={{ color: '#ccc', marginLeft: 4 }}>⇅</span>
-    return <span style={{ color: '#b32e46', marginLeft: 4 }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
+    return <span style={{ color: '#5fcf80', marginLeft: 4 }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
   }
 
   const treeColorscale: [number, string][] = [
-    [0.0, '#1a0a0d'],
-    [0.4, '#4a1525'],
-    [0.7, '#7f2235'],
-    [1.0, '#b32e46'],
+    [0.0, '#0a1a0d'],
+    [0.4, '#1a4a25'],
+    [0.7, '#2a7a40'],
+    [1.0, '#5fcf80'],
   ]
 
   return (
@@ -150,7 +150,7 @@ export default function SongsTab({ records }: Props) {
                 <th
                   key={key}
                   onClick={() => handleHeaderClick(key)}
-                  style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', background: sortKey === key ? '#1a1e2a' : undefined }}
+                  style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', background: sortKey === key ? '#1a2e1a' : undefined }}
                 >
                   {label}{sortIndicator(key)}
                 </th>
@@ -165,7 +165,7 @@ export default function SongsTab({ records }: Props) {
                 <td style={{ color: '#666' }}>{s.作詞}</td>
                 <td style={{ color: '#666' }}>{s.作曲}</td>
                 <td style={{ color: '#666' }}>{s.リリース日}</td>
-                <td style={{ textAlign: 'center', fontWeight: 600, color: '#b32e46' }}>{s.歌唱回数}</td>
+                <td style={{ textAlign: 'center', fontWeight: 600, color: '#5fcf80' }}>{s.歌唱回数}</td>
               </tr>
             ))}
           </tbody>
@@ -194,7 +194,7 @@ export default function SongsTab({ records }: Props) {
           plot_bgcolor: 'rgba(0,0,0,0)',
           font: { family: 'Noto Sans JP', color: '#a0a0a0', size: 12 },
           yaxis: { autorange: 'reversed', showgrid: false, tickfont: { size: 11 }, color: '#a0a0a0' },
-          xaxis: { showgrid: true, gridcolor: 'rgba(179,46,70,0.15)', zeroline: false, color: '#606060' },
+          xaxis: { showgrid: true, gridcolor: 'rgba(95,207,128,0.15)', zeroline: false, color: '#606060' },
           margin: { l: 160, r: 55, t: 16, b: 10 },
           height: Math.max(380, top20.length * 26),
           dragmode: false,
@@ -221,7 +221,7 @@ export default function SongsTab({ records }: Props) {
               marker: {
                 color: years.map(([, v]) => v),
                 colorscale: [
-                  [0.0, '#1a0a0d'], [0.4, '#4a1525'], [0.7, '#7f2235'], [1.0, '#b32e46'],
+                  [0.0, '#0a1a0d'], [0.4, '#1a4a25'], [0.7, '#2a7a40'], [1.0, '#5fcf80'],
                 ],
                 line: { width: 0 },
               },
@@ -232,7 +232,7 @@ export default function SongsTab({ records }: Props) {
               plot_bgcolor: 'rgba(0,0,0,0)',
               font: { family: 'Noto Sans JP', color: '#a0a0a0', size: 12 },
               xaxis: { showgrid: false, color: '#606060', tickangle: -45, tickfont: { size: 11 } },
-              yaxis: { showgrid: true, gridcolor: 'rgba(179,46,70,0.15)', zeroline: false, color: '#606060' },
+              yaxis: { showgrid: true, gridcolor: 'rgba(95,207,128,0.15)', zeroline: false, color: '#606060' },
               margin: { l: 40, r: 20, t: 24, b: 60 },
               height: 320,
               dragmode: false,
