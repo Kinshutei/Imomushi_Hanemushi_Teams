@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      # CSVが更新されたとき
-      - 'streaming_info.csv'
-      # webフォルダのソースが変更されたとき
+      - 'streaming_info.json'
+      - 'rkmusic_song_master.json'
       - 'web/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:  # 手動実行も可能
 
 permissions:
@@ -42,9 +42,8 @@ jobs:
         run: npm run build
         working-directory: web
         env:
-          # CSVのURL（同リポジトリのrawファイル）
-          VITE_CSV_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/streaming_info.csv
-          VITE_MASTER_CSV_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/rkmusic_song_master.csv
+          VITE_CSV_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/streaming_info.json
+          VITE_MASTER_CSV_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/rkmusic_song_master.json
 
       - uses: actions/upload-pages-artifact@v3
         with:
