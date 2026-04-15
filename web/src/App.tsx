@@ -234,7 +234,7 @@ export default function App() {
       <aside className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
         <div className="sidebar-top" onClick={handleLogoClick}>
           <span className="sidebar-tagline">Every song---<br />an eternal trace.</span>
-          <span className="sidebar-title">声の記録</span>
+          <span className="sidebar-title">芋虫羽虫㌠の部屋</span>
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS.map(({ tab, label }) => (

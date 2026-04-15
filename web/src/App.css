@@ -113,11 +113,11 @@ body {
 
 .sidebar-nav-item:hover {
   color: #e0e0e0;
-  background: #b32e46;
+  background: #3a8f55;
 }
 
 .sidebar-nav-item.active {
-  color: #b32e46;
+  color: #5fcf80;
 }
 
 
