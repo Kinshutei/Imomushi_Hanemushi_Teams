@@ -11,11 +11,11 @@ import './App.css'
 
 const CSV_URL =
   import.meta.env.VITE_CSV_URL ??
-  'https://raw.githubusercontent.com/OWNER/REPO/main/streaming_info.csv'
+  'https://raw.githubusercontent.com/Kinshutei/Imomushi_Hanemushi_Teams/main/streaming_info.json'
 
 const MASTER_URL =
   import.meta.env.VITE_MASTER_CSV_URL ??
-  'https://raw.githubusercontent.com/OWNER/REPO/main/rkmusic_song_master.csv'
+  'https://raw.githubusercontent.com/Kinshutei/Imomushi_Hanemushi_Teams/main/rkmusic_song_master.json'
 
 const BANNER_URL =
   'https://yt3.googleusercontent.com/u3MLvApeviPLt_-RPfqiPB1ZPeEtaBknWDv-jKyzMGEijRaireQ2zfxK1HmkuDtJpUIW_uVXxEY' +
@@ -36,16 +36,16 @@ export default function App() {
     Promise.all([
       fetch(MASTER_URL).then((r) => {
         if (!r.ok) throw new Error(`master HTTP ${r.status}`)
-        return r.text()
+        return r.json()
       }),
       fetch(CSV_URL).then((r) => {
         if (!r.ok) throw new Error(`streaming HTTP ${r.status}`)
-        return r.text()
+        return r.json()
       }),
     ])
-      .then(([masterText, csvText]) => {
-        const masterMap = parseSongMaster(masterText)
-        setRecords(parseStreamingCSV(csvText, masterMap))
+      .then(([masterData, csvData]) => {
+        const masterMap = parseSongMaster(masterData)
+        setRecords(parseStreamingCSV(csvData, masterMap))
         setLoading(false)
       })
       .catch((e: unknown) => {

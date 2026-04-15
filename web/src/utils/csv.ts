@@ -1,14 +1,9 @@
-import Papa from 'papaparse'
 import { SongMaster, StreamingRecord, SongStat } from '../types'
 
 // ── 楽曲マスター ──────────────────────────────
-export function parseSongMaster(text: string): Map<string, SongMaster> {
-  const result = Papa.parse<Record<string, string>>(text, {
-    header: true,
-    skipEmptyLines: true,
-  })
+export function parseSongMaster(rows: Record<string, string>[]): Map<string, SongMaster> {
   const map = new Map<string, SongMaster>()
-  for (const row of result.data) {
+  for (const row of rows) {
     const id = row['song_id']?.trim()
     if (!id) continue
     map.set(id, {
@@ -25,14 +20,10 @@ export function parseSongMaster(text: string): Map<string, SongMaster> {
 
 // ── 配信情報（マスター結合） ──────────────────
 export function parseStreamingCSV(
-  text: string,
+  rows: Record<string, string>[],
   masterMap: Map<string, SongMaster>
 ): StreamingRecord[] {
-  const result = Papa.parse<Record<string, string>>(text, {
-    header: true,
-    skipEmptyLines: true,
-  })
-  return result.data.map((row) => {
+  return rows.map((row) => {
     const songId = row['song_id']?.trim() ?? ''
     const master = masterMap.get(songId)
     return {
