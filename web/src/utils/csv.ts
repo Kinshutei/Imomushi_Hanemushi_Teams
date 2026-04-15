@@ -73,6 +73,7 @@ export function aggregateSongs(records: StreamingRecord[]): SongStat[] {
         作詞: r.作詞,
         作曲: r.作曲,
         リリース日: r.リリース日,
+        リリース年: toReleaseYear(r.リリース日),
         歌唱回数: 1,
       })
     }

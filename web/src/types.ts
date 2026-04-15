@@ -34,5 +34,6 @@ export interface SongStat {
   作詞: string
   作曲: string
   リリース日: string
+  リリース年: string
   歌唱回数: number
 }
