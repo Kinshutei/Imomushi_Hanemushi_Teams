@@ -16,11 +16,10 @@ const MASTER_URL =
   import.meta.env.VITE_MASTER_CSV_URL ??
   'https://raw.githubusercontent.com/Kinshutei/Imomushi_Hanemushi_Teams/main/rkmusic_song_master.json'
 
-const VIDEOS = [
-  { src: `${import.meta.env.BASE_URL}dia_moviecard_01.mp4`, grayscale: false, rate: 0.6  },
-  { src: `${import.meta.env.BASE_URL}dia_moviecard_02.mp4`, grayscale: true,  rate: 1.0  },
-  { src: `${import.meta.env.BASE_URL}dia_moviecard_03.mp4`, grayscale: true,  rate: 1.0  },
-  { src: `${import.meta.env.BASE_URL}dia_moviecard_04.mp4`, grayscale: true,  rate: 0.6  },
+const IMAGES = [
+  `${import.meta.env.BASE_URL}kisaki_imagecard_01.jpg`,
+  `${import.meta.env.BASE_URL}kisaki_imagecard_02.jpg`,
+  `${import.meta.env.BASE_URL}kisaki_imagecard_03.jpg`,
 ]
 
 type Tab = 'streams' | 'songs' | 'about' | 'changelog'
@@ -39,68 +38,47 @@ export default function App() {
   const [activeTab,    setActiveTab]    = useState<Tab | null>(null)
   const [sidebarOpen,  setSidebarOpen]  = useState(false)
   const [terminalKey,      setTerminalKey]      = useState(0)
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
-  const videoARef        = useRef<HTMLVideoElement>(null)
-  const videoBRef        = useRef<HTMLVideoElement>(null)
-  const activeVideoRef   = useRef<'a' | 'b'>('a')
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const imgARef          = useRef<HTMLImageElement>(null)
+  const imgBRef          = useRef<HTMLImageElement>(null)
+  const activeImgRef     = useRef<'a' | 'b'>('a')
   const transitioningRef = useRef(false)
-  const videoIndexRef    = useRef(0)
+  const imgIndexRef      = useRef(0)
   const grainCanvasRef   = useRef<HTMLCanvasElement>(null)
   const grainAnimRef     = useRef<number>(0)
-  const progressBarRef   = useRef<HTMLDivElement>(null)
 
-  const FADE_BEFORE = 1.5
-  const FADE_MS     = 1500
+  const FADE_MS = 1500
 
   useEffect(() => {
-    const videoA = videoARef.current
-    const videoB = videoBRef.current
-    if (!videoA || !videoB) return
+    const imgA = imgARef.current
+    const imgB = imgBRef.current
+    if (!imgA || !imgB) return
 
-    videoA.style.filter  = 'none'
-    videoA.playbackRate  = VIDEOS[0].rate
-    videoA.style.opacity = '1'
-    videoB.style.opacity = '0'
+    imgA.style.opacity = '1'
+    imgB.style.opacity = '0'
 
-    const onTimeUpdate = (e: Event) => {
+    const advance = () => {
       if (transitioningRef.current) return
-      const isA    = e.target === videoA
-      if ((activeVideoRef.current === 'a') !== isA) return
-      const current = isA ? videoA : videoB
-      const next    = isA ? videoB : videoA
-      if (!current.duration || isNaN(current.duration)) return
-      if (current.duration - current.currentTime > FADE_BEFORE) return
-
       transitioningRef.current = true
-      const nextIndex  = (videoIndexRef.current + 1) % VIDEOS.length
-      const nextConfig = VIDEOS[nextIndex]
+      const isA      = activeImgRef.current === 'a'
+      const current  = isA ? imgA : imgB
+      const next     = isA ? imgB : imgA
+      const nextIndex = (imgIndexRef.current + 1) % IMAGES.length
 
-      next.src          = nextConfig.src
-      next.style.filter = nextConfig.grayscale ? 'grayscale(1)' : 'none'
-      next.load()
-      next.currentTime  = 0
-      next.playbackRate = nextConfig.rate
-      next.play().catch(() => {})
-
+      next.src           = IMAGES[nextIndex]
       current.style.opacity = '0'
       next.style.opacity    = '1'
 
       setTimeout(() => {
-        current.pause()
-        current.currentTime    = 0
-        videoIndexRef.current  = nextIndex
-        setCurrentVideoIndex(nextIndex)
-        activeVideoRef.current = isA ? 'b' : 'a'
+        imgIndexRef.current    = nextIndex
+        setCurrentImageIndex(nextIndex)
+        activeImgRef.current   = isA ? 'b' : 'a'
         transitioningRef.current = false
       }, FADE_MS)
     }
 
-    videoA.addEventListener('timeupdate', onTimeUpdate)
-    videoB.addEventListener('timeupdate', onTimeUpdate)
-    return () => {
-      videoA.removeEventListener('timeupdate', onTimeUpdate)
-      videoB.removeEventListener('timeupdate', onTimeUpdate)
-    }
+    const timer = setInterval(advance, 15000)
+    return () => clearInterval(timer)
   }, [])
 
   useEffect(() => {
@@ -149,15 +127,6 @@ export default function App() {
     const loop = () => {
       frame++
 
-      const bar    = progressBarRef.current
-      const videoA = videoARef.current
-      const videoB = videoBRef.current
-      if (bar && videoA && videoB) {
-        const active   = activeVideoRef.current === 'a' ? videoA : videoB
-        const progress = active.duration ? active.currentTime / active.duration : 0
-        bar.style.width = `${progress * 100}%`
-      }
-
       if (frame % 4 === 0 && imageData && data) {
         data.fill(0)
         for (let i = 0; i < data.length; i += 4) {
@@ -182,33 +151,24 @@ export default function App() {
     }
   }, [])
 
-  const skipToVideo = useCallback((index: number) => {
-    if (transitioningRef.current || videoIndexRef.current === index) return
-    const videoA = videoARef.current
-    const videoB = videoBRef.current
-    if (!videoA || !videoB) return
+  const skipToImage = useCallback((index: number) => {
+    if (transitioningRef.current || imgIndexRef.current === index) return
+    const imgA = imgARef.current
+    const imgB = imgBRef.current
+    if (!imgA || !imgB) return
 
     transitioningRef.current = true
-    const current = activeVideoRef.current === 'a' ? videoA : videoB
-    const next    = activeVideoRef.current === 'a' ? videoB : videoA
-    const config  = VIDEOS[index]
+    const current = activeImgRef.current === 'a' ? imgA : imgB
+    const next    = activeImgRef.current === 'a' ? imgB : imgA
 
-    next.src          = config.src
-    next.style.filter = config.grayscale ? 'grayscale(1)' : 'none'
-    next.load()
-    next.currentTime  = 0
-    next.playbackRate = config.rate
-    next.play().catch(() => {})
-
+    next.src              = IMAGES[index]
     current.style.opacity = '0'
     next.style.opacity    = '1'
 
     setTimeout(() => {
-      current.pause()
-      current.currentTime      = 0
-      videoIndexRef.current    = index
-      setCurrentVideoIndex(index)
-      activeVideoRef.current   = activeVideoRef.current === 'a' ? 'b' : 'a'
+      imgIndexRef.current      = index
+      setCurrentImageIndex(index)
+      activeImgRef.current     = activeImgRef.current === 'a' ? 'b' : 'a'
       transitioningRef.current = false
     }, FADE_MS)
   }, [])
@@ -233,7 +193,7 @@ export default function App() {
 
       <aside className={`sidebar${sidebarOpen ? ' sidebar--open' : ''}`}>
         <div className="sidebar-top" onClick={handleLogoClick}>
-          <span className="sidebar-tagline">Every song---<br />an eternal trace.</span>
+          <span className="sidebar-tagline">CasaCasa....MozoMozo...</span>
           <span className="sidebar-title">芋虫羽虫㌠の部屋</span>
         </div>
         <nav className="sidebar-nav">
@@ -261,23 +221,20 @@ export default function App() {
 
         {(activeTab === null || activeTab === 'about' || activeTab === 'streams') && (
           <section className="hero-section">
-            <video ref={videoARef} className="hero-video" src={VIDEOS[0].src} autoPlay muted playsInline />
-            <video ref={videoBRef} className="hero-video" muted playsInline />
+            <img ref={imgARef} className="hero-video" src={IMAGES[0]} alt="" />
+            <img ref={imgBRef} className="hero-video" alt="" />
             <canvas ref={grainCanvasRef} className="hero-grain" />
             <div className="hero-overlay" />
             <div className="hero-video-indicators">
-              {VIDEOS.map((_, i) => (
+              {IMAGES.map((_, i) => (
                 <div
                   key={i}
-                  className={`hero-video-indicator${currentVideoIndex === i ? ' active' : ''}`}
-                  onClick={() => skipToVideo(i)}
+                  className={`hero-video-indicator${currentImageIndex === i ? ' active' : ''}`}
+                  onClick={() => skipToImage(i)}
                 >
                   {i + 1}
                 </div>
               ))}
-            </div>
-            <div className="hero-progress-track">
-              <div ref={progressBarRef} className="hero-progress-bar" />
             </div>
             <div className="hero-terminal">
               <TerminalMessage key={terminalKey} />

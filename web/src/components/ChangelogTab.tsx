@@ -34,7 +34,7 @@ export default function ChangelogTab() {
   return (
     <div style={{ lineHeight: 1.85, color: '#c0c0c0' }}>
       <section>
-        <h3 style={{ color: '#b32e46', fontSize: '1.1rem' }}>更新履歴</h3>
+        <h3 style={{ color: '#5fcf80', fontSize: '1.1rem' }}>更新履歴</h3>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
           <tbody>
             {entries.map((entry) =>
