@@ -185,9 +185,9 @@ body {
 }
 
 .hero-video-indicator.active {
-  border-color: #b32e46;
-  color: #b32e46;
-  background: rgba(179, 46, 70, 0.12);
+  border-color: #3a8f55;
+  color: #3a8f55;
+  background: rgba(58, 143, 85, 0.12);
 }
 
 .hero-progress-track {
@@ -499,7 +499,7 @@ body {
 }
 .btn-secondary:hover {
   background: #242424;
-  color: #b32e46;
+  color: #3a8f55;
   border-color: #3e3e3e;
 }
 
@@ -572,8 +572,8 @@ body {
 .setlist-table td:nth-child(4) { width: 60px; }
 .setlist-table tr:last-child td { border-bottom: none; }
 .setlist-table tr:hover td { background: #1a1a1a; }
-.setlist-table a { color: #b32e46; text-decoration: none; }
-.setlist-table a:hover { color: #d4667a; text-decoration: underline; }
+.setlist-table a { color: #3a8f55; text-decoration: none; }
+.setlist-table a:hover { color: #5fcf80; text-decoration: underline; }
 
 
 /* ══════════════════════════════════════════
@@ -633,8 +633,8 @@ h3 {
   margin: 0 0 10px;
 }
 
-a { color: #b32e46; }
-a:hover { color: #d4667a; }
+a { color: #3a8f55; }
+a:hover { color: #5fcf80; }
 
 
 /* ══════════════════════════════════════════
@@ -722,8 +722,8 @@ a:hover { color: #d4667a; }
   }
 
   .songs-card {
-    background: rgba(179, 46, 70, 0.06);
-    border: 1px solid #2a1218;
+    background: rgba(58, 143, 85, 0.06);
+    border: 1px solid #122a18;
     border-radius: 8px;
     padding: 10px 12px;
     cursor: pointer;
@@ -759,7 +759,7 @@ a:hover { color: #d4667a; }
   .songs-card-count {
     font-size: 15px;
     font-weight: 700;
-    color: #b32e46;
+    color: #3a8f55;
     white-space: nowrap;
   }
 
@@ -773,7 +773,7 @@ a:hover { color: #d4667a; }
     margin-top: 6px;
     font-size: 12px;
     color: #888;
-    border-top: 1px solid #2a1218;
+    border-top: 1px solid #122a18;
     padding-top: 6px;
   }
 
@@ -784,12 +784,12 @@ a:hover { color: #d4667a; }
   .songs-card-more-btn {
     width: 100%;
     padding: 10px;
-    background: rgba(179, 46, 70, 0.1);
-    border: 1px solid #3a1520;
+    background: rgba(58, 143, 85, 0.1);
+    border: 1px solid #153a20;
     border-radius: 8px;
     font-family: inherit;
     font-size: 13px;
-    color: #b32e46;
+    color: #3a8f55;
     cursor: pointer;
     text-align: center;
   }

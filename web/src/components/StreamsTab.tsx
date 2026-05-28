@@ -66,8 +66,8 @@ export default function StreamsTab({ records }: Props) {
               outline: 'none',
               background: '#1c1c1c',
               color: '#e8e8e8',
-              boxShadow: isSearching ? '0 0 0 2px rgba(179,46,70,0.25)' : undefined,
-              borderColor: isSearching ? '#b32e46' : '#2e2e2e',
+              boxShadow: isSearching ? '0 0 0 2px rgba(58,143,85,0.25)' : undefined,
+              borderColor: isSearching ? '#3a8f55' : '#2e2e2e',
               transition: 'border-color 0.15s, box-shadow 0.15s',
             }}
           />
@@ -167,7 +167,7 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
               {thumbUrl ? (
                 <>
                   <img src={thumbUrl} alt="サムネイル" style={{ width: '100%', borderRadius: '6px' }} />
-                  <a href={cleanUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#b32e46', display: 'block', marginTop: '4px' }}>
+                  <a href={cleanUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#3a8f55', display: 'block', marginTop: '4px' }}>
                     ▶ YouTubeで開く
                   </a>
                 </>
@@ -196,7 +196,7 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
                     return (
                       <tr key={i} style={isHit ? { backgroundColor: 'rgba(107,159,212,0.12)' } : undefined}>
                         <td>{r.歌唱順}</td>
-                        <td style={hitTitle ? { fontWeight: 600, color: '#b32e46' } : undefined}>
+                        <td style={hitTitle ? { fontWeight: 600, color: '#3a8f55' } : undefined}>
                           {(() => {
                             const fa = firstAppearance.get(r.楽曲名)
                             const isFirst = fa?.枠名 === r.枠名 && fa?.歌唱順 === r.歌唱順
@@ -212,7 +212,7 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
                             ) : r.楽曲名
                           })()}
                         </td>
-                        <td style={{ color: hitArtist ? '#b32e46' : '#888888', fontWeight: hitArtist ? 600 : undefined }}>{r.原曲アーティスト}</td>
+                        <td style={{ color: hitArtist ? '#3a8f55' : '#888888', fontWeight: hitArtist ? 600 : undefined }}>{r.原曲アーティスト}</td>
                         <td>
                           {r.枠URL && (
                             <a href={r.枠URL} target="_blank" rel="noopener noreferrer" style={{ color: '#5a7fa8' }}>
