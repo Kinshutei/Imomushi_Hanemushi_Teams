@@ -176,58 +176,35 @@ function StreamExpander({ label, forceOpen, defaultOpen, thumbUrl, cleanUrl, set
               )}
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table className="setlist-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>楽曲名</th>
-                    <th>原曲アーティスト</th>
-                    <th>URL</th>
-                    {showCollab && <th>コラボ相手様</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {setlist.map((r, i) => {
-                    const q = query.toLowerCase()
-                    const hitTitle  = query.length > 0 && r.楽曲名.toLowerCase().includes(q)
-                    const hitArtist = query.length > 0 && r.原曲アーティスト.toLowerCase().includes(q)
-                    const isHit = hitTitle || hitArtist
-                    return (
-                      <tr key={i} style={isHit ? { backgroundColor: 'rgba(107,159,212,0.12)' } : undefined}>
-                        <td>{r.歌唱順}</td>
-                        <td style={hitTitle ? { fontWeight: 600, color: '#3a8f55' } : undefined}>
-                          {(() => {
-                            const fa = firstAppearance.get(r.楽曲名)
-                            const isFirst = fa?.枠名 === r.枠名 && fa?.歌唱順 === r.歌唱順
-                            return isFirst ? (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                                <span style={{
-                                  fontSize: 10, fontWeight: 700, color: '#d4a843',
-                                  border: '1px solid #d4a843', borderRadius: 3,
-                                  padding: '1px 4px', letterSpacing: '0.05em', lineHeight: 1.4,
-                                }}>初</span>
-                                {r.楽曲名}
-                              </span>
-                            ) : r.楽曲名
-                          })()}
-                        </td>
-                        <td style={{ color: hitArtist ? '#3a8f55' : '#888888', fontWeight: hitArtist ? 600 : undefined }}>{r.原曲アーティスト}</td>
-                        <td>
-                          {r.枠URL && (
-                            <a href={r.枠URL} target="_blank" rel="noopener noreferrer" style={{ color: '#5a7fa8' }}>
-                              ▶ 開く
-                            </a>
-                          )}
-                        </td>
-                        {showCollab && (
-                          <td style={{ color: '#888888' }}>{r.コラボ相手様 === 'なし' ? '' : r.コラボ相手様}</td>
-                        )}
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+            <div>
+              {setlist.map((r, i) => {
+                const q = query.toLowerCase()
+                const hitTitle  = query.length > 0 && r.楽曲名.toLowerCase().includes(q)
+                const hitArtist = query.length > 0 && r.原曲アーティスト.toLowerCase().includes(q)
+                const isHit = hitTitle || hitArtist
+                const fa = firstAppearance.get(r.楽曲名)
+                const isFirst = fa?.枠名 === r.枠名 && fa?.歌唱順 === r.歌唱順
+                return (
+                  <div key={i} className={`setlist-card${isHit ? ' setlist-card--hit' : ''}`}>
+                    <span className="setlist-card-num">{r.歌唱順}</span>
+                    <div className="setlist-card-body">
+                      <div className="setlist-card-title">
+                        {isFirst && <span className="setlist-card-badge">初</span>}
+                        <span className={hitTitle ? 'setlist-card-title--hit' : ''}>{r.楽曲名}</span>
+                      </div>
+                      <div className={`setlist-card-artist${hitArtist ? ' setlist-card-artist--hit' : ''}`}>
+                        {r.原曲アーティスト}
+                      </div>
+                      {showCollab && r.コラボ相手様 && r.コラボ相手様 !== 'なし' && r.コラボ相手様 !== '' && (
+                        <div className="setlist-card-collab">w/ {r.コラボ相手様}</div>
+                      )}
+                    </div>
+                    {r.枠URL && (
+                      <a href={r.枠URL} target="_blank" rel="noopener noreferrer" className="setlist-card-link">▶ 開く</a>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
